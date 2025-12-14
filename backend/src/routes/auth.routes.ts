@@ -9,8 +9,12 @@ import { validateRequest } from '../schemas/common.schema';
 import { loginSchema, refreshSchema, logoutSchema } from '../schemas/auth.schema';
 import { asyncHandler } from '../middleware/error.middleware';
 import { logger } from '../utils/logger';
+import { authLimiter } from '../middleware/rateLimiter.middleware'; // Added import for authLimiter
 
 export const authRouter = Router();
+
+// Apply strict rate limiting to all auth routes (5 req/min)
+authRouter.use(authLimiter); // Added authLimiter middleware
 
 /**
  * POST /api/v1/auth/login

@@ -28,6 +28,9 @@ export const env = {
     // CORS
     corsOrigin: process.env['CORS_ORIGIN'] ?? 'http://localhost:3000',
 
+    // Redis (optional - for caching and rate limiting)
+    redisUrl: process.env['REDIS_URL'] ?? '',
+
     // Logging
     logLevel: process.env['LOG_LEVEL'] ?? 'debug',
 } as const;
