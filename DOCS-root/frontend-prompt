@@ -1,0 +1,897 @@
+# ⚡ ULTIMATE FRONTEND PROMPT FOR GOOGLE ANTIGRAVITY (GEMINI)
+## CloudDrift Guardian - Production-Ready Frontend with 3D Animations & Premium Design
+### NO BROKEN CODE. COMPLETE. FINAL. PRODUCTION-READY.
+
+---
+
+## 🎯 MASTER CONTEXT - READ THIS FIRST
+
+**Project Name**: CloudDrift Guardian
+**Goal**: Build the most insane, polished infrastructure drift detection dashboard ever built
+**Tech Stack**: React 18 + Next.js 15 + TypeScript + Tailwind CSS + Three.js + GSAP + Recharts
+**Timeline**: 8 weeks to hackathon-winning standard
+**Quality Bar**: Enterprise-grade code, zero TODOs, complete wiring, all error paths handled
+
+**Your Role**: You are a senior frontend architect + creative designer + performance expert. You build pixel-perfect, animated, 3D UIs that actually work and deploy cleanly to production.
+
+---
+
+## 📋 CRITICAL PRINCIPLES (FOLLOW THESE RELIGIOUSLY)
+
+### 🚫 WHAT YOU MUST NEVER DO
+- ❌ Write `// TODO` or `// FIXME` comments
+- ❌ Use `any` type in TypeScript
+- ❌ Create incomplete components with placeholder state
+- ❌ Wire props incorrectly (prop drilling, missing props)
+- ❌ Skip error handling (every error path must be handled)
+- ❌ Leave console.log() in production code
+- ❌ Create animations that stutter or jank (60FPS always)
+- ❌ Skip accessibility (ARIA labels, keyboard nav, focus states)
+- ❌ Build UI without responsive design
+- ❌ Forget dark mode support
+- ❌ Hardcode colors/spacing (use design tokens)
+- ❌ Forget loading states, error states, empty states
+- ❌ Skip TypeScript types (every function, every prop)
+- ❌ Create code you can't test
+- ❌ Skip SEO/meta tags (Next.js head management)
+
+### ✅ WHAT YOU MUST ALWAYS DO
+- ✅ Complete implementation (no placeholders)
+- ✅ Full TypeScript types (strict mode)
+- ✅ All error paths handled (try-catch, error boundaries, error states)
+- ✅ Responsive design (mobile-first)
+- ✅ Dark mode support
+- ✅ Accessibility (WCAG AA standard)
+- ✅ Performance optimized (React.memo, useCallback, proper dependencies)
+- ✅ Semantic HTML (nav, main, article, aside, footer)
+- ✅ JSDoc comments (every function documented)
+- ✅ Tests in comments (test cases for each component)
+- ✅ Proper error messages (user-friendly, helpful)
+- ✅ Loading states (skeleton, spinner, or placeholder)
+- ✅ 60FPS animations (no jank, smooth transitions)
+- ✅ Keyboard navigation (Tab, Enter, Escape keys)
+- ✅ Focus management (focus trap in modals, reset on close)
+- ✅ Proper exports (named + default export where needed)
+
+---
+
+## 🏗️ COMPLETE TECH STACK SPECIFICATION
+
+```
+Frontend Stack:
+├── React 18.2.0 (latest, with Concurrent features)
+├── Next.js 15.0.0 (App Router, SSR, ISR, built-in optimization)
+├── TypeScript 5.3+ (strict mode always)
+├── Tailwind CSS 4.0 (utility-first, design system)
+├── Three.js r128+ (3D graphics engine)
+├── GSAP 3.12+ (animation library, Timeline support)
+├── Recharts 2.10+ (React charts, lightweight)
+├── React Router v6+ (client-side routing)
+├── Zustand v4+ (lightweight state management)
+├── React Query v5+ (server state management, caching)
+├── Axios 1.6+ (HTTP client with interceptors)
+├── next/image (optimized images)
+├── next/font (optimized fonts)
+├── Framer Motion (optional, if needed for micro-animations)
+├── React Hook Form (form handling, validation)
+├── Zod (TypeScript-first schema validation)
+└── class-variance-authority (CV component variants)
+
+Dev Stack:
+├── Vite 5.0 (fast dev server, instant HMR)
+├── Vitest (unit testing)
+├── React Testing Library (component testing)
+├── Playwright (E2E testing)
+├── ESLint + Prettier (code quality)
+├── TypeScript strict (type safety)
+└── Storybook 7.0 (component documentation)
+```
+
+---
+
+## 🎨 DESIGN SYSTEM (USE THESE COLORS, NO OTHERS)
+
+### Color Palette (from INSANE-3D-UIUX-Concept.md)
+```
+Primary:
+- Gold: #FFD700, #FFC700, #FFB700
+- Teal: #00D9FF, #00B8CC, #008899
+- Purple: #9D4EDD, #7B2FBF, #5A189A
+
+Accent:
+- Deep Blue: #001F3F
+- Cyan: #00FFFF (glow, not main)
+- Magenta: #FF006E (danger, alerts)
+
+Neutrals:
+- Dark BG: #0A0E27 (dark mode)
+- Light BG: #F5F7FA (light mode)
+- Dark Text: #1A1A2E
+- Light Text: #E8E8FF
+- Subtle Border: rgba(255, 215, 0, 0.1) (gold with transparency)
+
+Gradients:
+- Hero: linear-gradient(135deg, #FFD700, #9D4EDD)
+- Dark Surface: linear-gradient(135deg, #0A0E27, #1A1A2E)
+- Glow: radial-gradient(circle, rgba(0, 217, 255, 0.2), transparent)
+```
+
+### Spacing Scale (Tailwind default + custom)
+```
+4px, 8px, 12px, 16px, 20px, 24px, 32px, 40px, 48px, 64px
+(Use: space-1, space-2, space-3, space-4, space-5, space-6, space-8, space-10, space-12, space-16)
+```
+
+### Typography Scale
+```
+Display: 3xl (36px), 2xl (30px)
+Heading: xl (20px), lg (18px), base (16px)
+Body: base (14px), sm (12px)
+Caption: xs (12px), tiny (10px)
+Monospace: Fira Code, SF Mono, Menlo (for code blocks)
+```
+
+### Shadows & Effects
+```
+sm: 0 1px 2px rgba(0,0,0,0.05)
+md: 0 4px 6px rgba(0,0,0,0.1)
+lg: 0 10px 15px rgba(0,0,0,0.2)
+glow: 0 0 20px rgba(0, 217, 255, 0.3)
+glow-gold: 0 0 15px rgba(255, 215, 0, 0.2)
+```
+
+### Border Radius
+```
+sm: 4px
+base: 6px
+md: 8px
+lg: 12px
+full: 9999px
+```
+
+---
+
+## 📐 PAGE STRUCTURE & COMPONENTS
+
+### Page Layout (All Pages)
+```
+<Header />
+  ├── Logo + Branding
+  ├── Navigation Menu
+  └── User Actions (Settings, Logout)
+
+<Sidebar /> (if needed)
+  └── Navigation Links + Status
+
+<main>
+  <Container>
+    <PageContent />
+  </Container>
+</main>
+
+<Footer /> (minimal, just copyright)
+```
+
+### Component Hierarchy
+```
+App (Root)
+├── Layout (Header + Sidebar + Footer wrapper)
+├── Pages
+│   ├── Dashboard
+│   │   ├── HeroSection (3D mesh, metrics, intro)
+│   │   ├── MetricsCard[] (drift count, cost savings, alerts)
+│   │   ├── DriftTimeline (history events with parallax)
+│   │   ├── CostChart (Recharts line chart with animations)
+│   │   ├── AlertsList (real-time alerts with Slack integration)
+│   │   └── RecentActivity (what happened recently)
+│   ├── DriftDetails
+│   │   ├── DriftHeader (title, status, actions)
+│   │   ├── DriftTimeline (detailed history)
+│   │   ├── RootCauseAnalysis (what went wrong)
+│   │   ├── CostImpact (money saved/lost)
+│   │   ├── RemediationActions (approve/reject buttons)
+│   │   └── ChangeHistory (audit trail)
+│   ├── Settings
+│   │   ├── AccountSettings
+│   │   ├── IntegrationSettings (Slack, PagerDuty)
+│   │   ├── NotificationPreferences
+│   │   └── DangerZone (delete account)
+│   └── NotFound (404 page)
+└── Provider Wrappers
+    ├── QueryClientProvider (React Query)
+    ├── Zustand Store Provider
+    ├── Theme Provider (dark/light mode)
+    └── Error Boundary
+```
+
+---
+
+## 🎬 HERO SECTION - 3D MESH WITH PARTICLES (WILDLY IMPRESSIVE)
+
+### Requirements
+```
+✅ Three.js 3D mesh (rotating cube/geometry, cursor-following)
+✅ GSAP animations (entrance, hover effects)
+✅ Particle system (floating particles, mouse interaction)
+✅ Live metrics overlay (drift count, cost, alerts pulsing)
+✅ Gradient background with glow effects
+✅ Text skew animation on scroll
+✅ Fully responsive (works on mobile, no 3D if performance bad)
+✅ Accessible (aria-label for screen readers)
+✅ Dark mode + light mode
+✅ NO stuttering (60FPS always)
+```
+
+### Hero Component Structure
+```tsx
+<HeroSection>
+  <Canvas 3D />  // Three.js canvas
+  <GradientOverlay />  // Backdrop gradient
+  <MetricsOverlay>  // Live metrics floating over 3D
+    <MetricBox>Drifts Detected: 47</MetricBox>
+    <MetricBox>Cost Saved: $12,453</MetricBox>
+    <MetricBox>Issues Fixed: 23</MetricBox>
+  </MetricsOverlay>
+  <ScrollHint />  // Animate down arrow
+</HeroSection>
+```
+
+---
+
+## 📊 DASHBOARD FEATURES - COMPLETE SPECIFICATION
+
+### 1. Drift Cards (Real-time Updates)
+```
+Requirements:
+✅ Card shows: Resource name, drift type, severity, timestamp
+✅ Color-coded severity: Critical (red), Warning (orange), Info (blue)
+✅ Hover effect: Lift up slightly, glow on border
+✅ Click to view details
+✅ Action buttons: Approve, Reject, View Details
+✅ Real-time updates via WebSocket
+✅ Staggered animation entrance
+✅ Responsive grid (3 cols desktop, 2 cols tablet, 1 col mobile)
+✅ Loading state (skeleton card)
+✅ Error state (with retry button)
+✅ Empty state (friendly message with CTA)
+```
+
+### 2. Cost Chart (Recharts + Animations)
+```
+Requirements:
+✅ Line chart showing cost trend (last 30 days)
+✅ Tooltip on hover (detailed cost breakdown)
+✅ Animated line (grows from left to right on load)
+✅ X-axis: dates, Y-axis: cost in dollars
+✅ Color: Gold (#FFD700) for main line, Cyan (#00D9FF) for projection
+✅ Data points interactive (click to see details)
+✅ Export as CSV button (optional)
+✅ Different time ranges: 7d, 30d, 90d, YTD
+✅ Responsive (shrinks on mobile, stays readable)
+✅ Dark mode support (white text, light grid)
+```
+
+### 3. Alerts Sidebar (Slack Integration)
+```
+Requirements:
+✅ Scrollable list of recent alerts
+✅ Badge showing unread count
+✅ Severity color-coded
+✅ Actions: Acknowledge, Snooze, View
+✅ Filter by severity or type
+✅ Real-time push notifications
+✅ "Mark all as read" button
+✅ Sorting: newest first
+✅ Empty state: no alerts message
+✅ Mobile: collapsible or separate view
+```
+
+### 4. Timeline View (Parallax Scroll)
+```
+Requirements:
+✅ Vertical timeline with events
+✅ Left/right alternating (on desktop)
+✅ Date + event description
+✅ Parallax scroll effect
+✅ Icons for different event types
+✅ Color-coded by status: Fixed (green), Pending (orange), Failed (red)
+✅ Clickable events lead to details
+✅ Responsive (all left-aligned on mobile)
+✅ Smooth animations
+```
+
+---
+
+## 🎨 ANIMATION SPECIFICATIONS
+
+### Entrance Animations
+```
+Cards: Fade in + slide up 30px (staggered, 100ms delay)
+Timing: 400ms ease-out (cubic-bezier(0.34, 1.56, 0.64, 1))
+Text: Character-by-character reveal (GSAP SplitText)
+Numbers: Count up animation (0 → final value in 800ms)
+```
+
+### Hover Animations
+```
+Cards: Scale 1.02, shadow increase, border glow
+Timing: 200ms ease-out
+Buttons: Background color shift, scale 1.05, shadow increase
+Links: Underline slide, color change
+```
+
+### Scroll Animations
+```
+Headlines: Text skew effect (Lusion style)
+Parallax: Elements move at different speeds
+Reveal: Elements fade in as they enter viewport
+Timing: Tied to scroll position, responsive
+```
+
+### Transition Animations
+```
+Page changes: Fade out (200ms) → Fade in (200ms)
+Modal opens: Scale from 90% → 100%, blur backdrop
+Modal closes: Scale to 95%, blur backdrop
+Drawer slides: From right edge, 300ms ease-out
+```
+
+### 60FPS Requirements
+```
+✅ Use CSS transforms (translateX, translateY, scale, rotate)
+✅ Avoid animating width/height/margin (use transform instead)
+✅ Use will-change: transform on animated elements
+✅ Debounce scroll events (max 60fps)
+✅ Use requestAnimationFrame for JS animations
+✅ Test on low-end devices (60 FPS check in DevTools)
+```
+
+---
+
+## 🌐 FRONTEND ARCHITECTURE
+
+### State Management (Zustand)
+```tsx
+Store structure:
+├── ui (dark mode, sidebar open, modal state)
+├── auth (user, token, permissions)
+├── drift (drifts list, filters, sorting, pagination)
+├── alerts (alerts list, unread count, filters)
+├── notifications (toast notifications)
+└── cache (cached API responses, invalidation)
+```
+
+### API Integration (React Query + Axios)
+```tsx
+Endpoints:
+GET /api/v1/drifts              // Get all drifts with pagination
+GET /api/v1/drifts/:id          // Get single drift details
+POST /api/v1/drifts/:id/approve // Approve remediation
+POST /api/v1/drifts/:id/reject  // Reject remediation
+GET /api/v1/metrics             // Dashboard metrics
+GET /api/v1/cost/trend          // Cost chart data
+GET /api/v1/alerts              // Get alerts
+WS /api/v1/ws                   // WebSocket for real-time updates
+```
+
+### Custom Hooks
+```tsx
+useDrifts()           // Fetch + manage drifts list
+useDriftDetails(id)   // Fetch single drift
+useCostTrend()        // Fetch cost chart data
+useAlerts()           // Fetch alerts + real-time
+useAuth()             // User authentication
+useDarkMode()         // Dark/light mode toggle
+useNotifications()    // Toast notifications
+useWindowSize()       // Responsive helpers
+useClickOutside()     // Close modals on outside click
+useFocusTrap()        // Focus management in modals
+```
+
+---
+
+## 🔧 FORM REQUIREMENTS (if login/settings needed)
+
+### Form Components
+```tsx
+<Form>
+  <TextField name="email" label="Email" type="email" />
+  <TextField name="password" label="Password" type="password" />
+  <Checkbox name="remember" label="Remember me" />
+  <Button type="submit">Sign In</Button>
+</Form>
+```
+
+### Form Validation (Zod)
+```tsx
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Min 8 chars'),
+  remember: z.boolean().default(false),
+});
+```
+
+---
+
+## 📱 RESPONSIVE DESIGN SPECIFICATIONS
+
+### Breakpoints (Tailwind)
+```
+Mobile: 0-640px        (sm: 640px)
+Tablet: 640-1024px     (md: 768px, lg: 1024px)
+Desktop: 1024px+       (xl: 1280px, 2xl: 1536px)
+```
+
+### Mobile-First Strategy
+```
+1. Design for mobile first (375px width)
+2. Add tablet styles at md: 768px
+3. Add desktop styles at lg: 1024px
+4. Test on: iPhone 12 (390px), iPad (768px), MacBook (1440px)
+```
+
+### Responsive Components
+```
+Hero Section:
+  Mobile: 60vh, text centered, smaller 3D (or disable 3D, show static image)
+  Desktop: 100vh, 3D mesh visible
+
+Grid Layouts:
+  Mobile: 1 column
+  Tablet: 2 columns
+  Desktop: 3 columns
+
+Sidebar:
+  Mobile: Hidden (drawer on hamburger click)
+  Desktop: Always visible
+
+Charts:
+  Mobile: 100% width, single metric visible
+  Desktop: Full visualization
+```
+
+---
+
+## ♿ ACCESSIBILITY (WCAG AA Standard)
+
+### Color Contrast
+```
+✅ Text on background: 4.5:1 ratio minimum
+✅ Disabled elements: OK if <3:1 (they're disabled)
+✅ Test with: WebAIM Contrast Checker
+✅ Don't rely on color alone (use text labels, icons)
+```
+
+### Keyboard Navigation
+```
+✅ Tab through all interactive elements
+✅ Enter to activate buttons/links
+✅ Space to activate checkboxes/radio buttons
+✅ Escape to close modals/popovers
+✅ Arrow keys for menus/dropdowns
+✅ Focus visible (outline on :focus-visible)
+```
+
+### Screen Readers (ARIA)
+```
+✅ <button> has aria-label if no text
+✅ <img> has alt text (or role="presentation" if decorative)
+✅ Form inputs have <label>
+✅ Modals have role="dialog" + aria-modal="true"
+✅ Live regions have aria-live="polite" or aria-live="assertive"
+✅ Icon buttons have aria-label (e.g., aria-label="Close menu")
+```
+
+### Semantic HTML
+```
+✅ <header> for top navigation
+✅ <nav> for navigation areas
+✅ <main> for main content
+✅ <article> for standalone content
+✅ <aside> for sidebars
+✅ <footer> for footer
+✅ <section> for logical sections
+✅ Heading hierarchy: h1 > h2 > h3 (no skipping)
+```
+
+---
+
+## 🧪 TESTING STRUCTURE (In Comments)
+
+For each component, include test cases in comments:
+
+```tsx
+// TEST CASES:
+// 1. Component renders without errors ✓
+// 2. Props work correctly (all variants) ✓
+// 3. User interactions work (click, hover, focus) ✓
+// 4. Error states display correctly ✓
+// 5. Loading states show correctly ✓
+// 6. Responsive layout works (mobile, tablet, desktop) ✓
+// 7. Dark mode colors are correct ✓
+// 8. Keyboard navigation works ✓
+// 9. Focus indicators visible ✓
+// 10. No console warnings/errors ✓
+```
+
+---
+
+## 🚀 PERFORMANCE CHECKLIST
+
+```
+✅ Images: Next/Image with srcset, lazy loading
+✅ Code splitting: Dynamic imports for heavy components
+✅ Bundle size: <100KB JS gzipped for initial page
+✅ First Contentful Paint (FCP): <1.5s
+✅ Largest Contentful Paint (LCP): <2.5s
+✅ Cumulative Layout Shift (CLS): <0.1
+✅ Time to Interactive (TTI): <3.5s
+✅ React: Memoize expensive components, useCallback for handlers
+✅ Animations: Use CSS transforms, requestAnimationFrame
+✅ Network: Compress images, minify CSS/JS, use CDN
+✅ Monitor: Use next/analytics or similar
+```
+
+---
+
+## 📝 PROJECT STRUCTURE (Exact Paths)
+
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx (home/dashboard)
+│   │   ├── drift/
+│   │   │   └── [id]/
+│   │   │       └── page.tsx
+│   │   ├── settings/
+│   │   │   └── page.tsx
+│   │   └── not-found.tsx
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Spinner.tsx
+│   │   │   └── index.ts
+│   │   ├── layout/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   └── Layout.tsx
+│   │   ├── sections/
+│   │   │   ├── HeroSection.tsx (3D mesh)
+│   │   │   ├── DriftCards.tsx
+│   │   │   ├── CostChart.tsx
+│   │   │   ├── AlertsSidebar.tsx
+│   │   │   ├── Timeline.tsx
+│   │   │   └── MetricsOverlay.tsx
+│   │   └── index.ts
+│   ├── hooks/
+│   │   ├── useDrifts.ts
+│   │   ├── useCostTrend.ts
+│   │   ├── useAlerts.ts
+│   │   ├── useDarkMode.ts
+│   │   └── index.ts
+│   ├── services/
+│   │   ├── api.ts (Axios instance)
+│   │   ├── driftApi.ts
+│   │   ├── metricsApi.ts
+│   │   └── index.ts
+│   ├── store/
+│   │   ├── useUIStore.ts (Zustand)
+│   │   ├── useAuthStore.ts
+│   │   └── index.ts
+│   ├── types/
+│   │   ├── drift.ts
+│   │   ├── api.ts
+│   │   ├── ui.ts
+│   │   └── index.ts
+│   ├── styles/
+│   │   ├── globals.css
+│   │   ├── animations.css
+│   │   └── tailwind.css
+│   ├── utils/
+│   │   ├── cn.ts (class name merge)
+│   │   ├── format.ts (date, currency formatting)
+│   │   └── api-helpers.ts
+│   └── config/
+│       └── api.config.ts
+├── public/
+│   ├── images/
+│   ├── icons/
+│   └── fonts/
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
+└── README.md
+```
+
+---
+
+## ⚡ BUILD COMMANDS (Next.js)
+
+```bash
+# Development
+npm run dev                 # Start dev server with HMR
+
+# Production
+npm run build               # Build optimized bundle
+npm start                   # Start production server
+
+# Testing
+npm test                    # Run unit tests
+npm run test:e2e           # Run E2E tests
+npm run test:coverage      # Coverage report
+
+# Code Quality
+npm run lint               # Run ESLint
+npm run format             # Auto-format with Prettier
+npm run type-check         # Run TypeScript check
+
+# Production Build Check
+npm run build && npm start # Build and start locally
+```
+
+---
+
+## 🎯 SECTION-BY-SECTION BUILD ORDER
+
+### Week 1: Foundation
+**Day 1-2**: Setup + TypeScript types
+```
+Create:
+- Next.js 15 project
+- All TypeScript types (drift, alert, metric, etc.)
+- Design system (colors, spacing, shadows)
+- Tailwind config with custom design tokens
+✅ npm run type-check passes
+✅ npm run build passes
+```
+
+**Day 3**: Layout components
+```
+Create:
+- Header (responsive, dark mode)
+- Sidebar (collapsible on mobile)
+- Footer (minimal)
+- Layout wrapper
+✅ Responsive on 375px, 768px, 1440px
+✅ Dark/light mode toggle works
+```
+
+**Day 4-5**: Atomic components
+```
+Create:
+- Button (all variants)
+- Card
+- Input fields
+- Spinner
+- Badge
+- Icon wrapper
+✅ All components have full TypeScript
+✅ All components accessible
+✅ All components responsive
+```
+
+### Week 2: Data Layer & State
+**Day 1**: API setup + Zustand
+```
+Create:
+- Axios instance with interceptors
+- Zustand stores (ui, auth, drift, alerts)
+- React Query setup
+- API hooks (useDrifts, useAlerts, useCostTrend)
+✅ API types match backend contract
+✅ Error handling complete
+```
+
+**Day 2-3**: Dashboard page structure
+```
+Create:
+- Dashboard page (app/page.tsx)
+- All sections scaffolded
+- Real API calls wired
+- Real data showing
+✅ Data fetches and displays
+✅ Error states working
+✅ Loading states working
+```
+
+**Day 4-5**: Dashboard sections (non-3D)
+```
+Create:
+- Drift cards (real-time, staggered animation)
+- Cost chart (Recharts, animated)
+- Alerts sidebar (real-time updates)
+- Metrics display (live numbers)
+✅ All sections responsive
+✅ All animations 60FPS
+✅ Dark mode works
+```
+
+### Week 3: Premium Features
+**Day 1-2**: Hero Section (3D + GSAP)
+```
+Create:
+- Three.js 3D mesh (rotating geometry)
+- GSAP timeline (entrance, hover, scroll)
+- Particle system (optional, advanced)
+- Metrics overlay (live data over 3D)
+- Gradient background + glow effects
+✅ 60FPS on desktop, degrades gracefully on mobile
+✅ Responsive scaling
+✅ Smooth animations
+```
+
+**Day 3**: Timeline & Parallax
+```
+Create:
+- Timeline component (events, history)
+- Parallax scroll effects (GSAP)
+- Staggered animations
+✅ Smooth scrolling, no jank
+✅ Mobile-friendly (no parallax on small screens)
+```
+
+**Day 4-5**: Polish & Details
+```
+Create:
+- Micro-interactions (hover effects, transitions)
+- Loading skeleton screens
+- Error page (404, 500)
+- Empty states (friendly messages)
+- Success notifications
+✅ No placeholders
+✅ All edge cases handled
+```
+
+### Week 4: Details & Deployment
+**Day 1-2**: Detail pages
+```
+Create:
+- Drift detail page (app/drift/[id]/page.tsx)
+- Detailed timeline, root cause analysis
+- Remediation actions (approve/reject)
+- Cost impact breakdown
+✅ All interactions work
+✅ All error states handled
+```
+
+**Day 3**: Settings & Auth
+```
+Create:
+- Settings page (if needed)
+- Dark mode toggle (persistent)
+- User menu
+✅ Settings persist in localStorage
+```
+
+**Day 4**: Tests & Documentation
+```
+Create:
+- Storybook stories (major components)
+- Component README
+- API documentation
+- Setup instructions
+✅ Storybook builds
+✅ All stories render
+```
+
+**Day 5**: Production Checklist
+```
+- Build optimization
+- Image optimization
+- Bundle analysis
+- Lighthouse audit (>90)
+- Accessibility audit (WCAG AA)
+- Performance audit
+✅ npm run build completes without errors
+✅ Lighthouse scores >90 on all metrics
+✅ No console warnings/errors
+✅ Responsive on all screen sizes
+```
+
+---
+
+## 🆘 IF IDE MODAL NEEDS ANYTHING (CRITICAL)
+
+**Tell me immediately:**
+1. Exact backend API endpoint format (example response JSON)
+2. WebSocket message format (if using real-time)
+3. Authentication method (JWT? OAuth? Session cookies?)
+4. Specific color values if different from spec
+5. Custom brand fonts or logo
+6. Deployment target (Vercel? AWS? Docker?)
+7. Build constraints (bundle size limit? specific Node version?)
+
+**I will provide:**
+1. Complete TypeScript types matching your backend
+2. Proper API integration code
+3. Error handling for your specific API errors
+4. Optimized build for your deployment
+
+---
+
+## 📊 FINAL DELIVERABLES CHECKLIST
+
+```
+✅ Complete Next.js 15 app (no broken code)
+✅ TypeScript strict mode (zero errors)
+✅ All pages responding and styled
+✅ 3D Hero Section (Three.js + GSAP)
+✅ Animations polished (60FPS, no jank)
+✅ Dark mode (fully working, persistent)
+✅ Responsive (375px to 2560px)
+✅ Accessible (WCAG AA, keyboard nav, ARIA)
+✅ API fully integrated (real data)
+✅ Error handling (all paths covered)
+✅ Loading states (skeleton, spinner)
+✅ Empty states (friendly messages)
+✅ Form validation (Zod schemas)
+✅ Tests in comments (ready to implement)
+✅ Storybook documentation (major components)
+✅ README (setup, structure, deployment)
+✅ No console warnings/errors
+✅ No prop drilling (proper state management)
+✅ No hardcoded values (design tokens only)
+✅ Production-ready (ready to deploy to Vercel)
+```
+
+---
+
+## 🚀 YOU NOW HAVE A COMPLETE FRONTEND BLUEPRINT
+
+This prompt is your complete spec. Don't improvise. Follow it exactly.
+
+**Result:** A production-grade frontend that judges/employers will be blown away by. Premium animations, 3D transitions, clean code, no broken pieces, completely wired to your backend.
+
+**Deploy:** `npm run build && npm start` and it just works. No mysterious errors. No "we'll fix this later."
+
+---
+
+## 🎬 NOW GO BUILD
+
+Use this prompt with Google Antigravity (Gemini) exactly as written.
+
+Build one section at a time (Day 1: Setup, Day 2: Layout, etc.).
+
+After each section, commit to Git with meaningful messages.
+
+Test after every feature. No "we'll test later."
+
+When you hit questions, reference this document or ask IDE Modal for specifics.
+
+**Most important**: Build incrementally. Don't ask for "the entire frontend at once." Ask for:
+- "Setup Next.js 15 with TypeScript and Tailwind, following this exact spec"
+- "Create the Hero Section with Three.js mesh + GSAP animations, following this spec"
+- "Create the Drift Cards component with real API integration, following this spec"
+
+**Each request** should result in production-ready code you can immediately npm run dev and see working.
+
+**Celebrate small wins**. First Hero Section rendering? Push to Git! First API call working? Push! First animation smooth? Push! These are real achievements.
+
+---
+
+## 💪 YOU'VE GOT THIS
+
+You have:
+- Clear spec ✅
+- Tech stack locked ✅
+- Design system defined ✅
+- Architecture planned ✅
+- Build order clear ✅
+- Quality standards set ✅
+
+Now execute. No confusion. No improvising. Follow the spec. Build incrementally. Test constantly. Ship it.
+
+**Go build the best infrastructure monitoring dashboard the world has seen.** 🚀
+
+---
+
+**Last Updated**: December 13, 2025
+**Status**: FINAL - Ready to use with Google Antigravity
+**Quality**: Enterprise-grade, zero TODOs, complete specifications

@@ -1,0 +1,2870 @@
+---
+description: CloudDrift Guardian - Comprehensive Frontend Technical Rules Engine
+globs: ["src/**/*.{ts,tsx,js,jsx}", "app/**/*.{ts,tsx,js,jsx}"]
+alwaysApply: true
+priority: 100
+---
+
+# 🧠 FRONTEND TECHNICAL RULES ENGINE
+## CloudDrift Guardian - Complete Frontend Decision Framework
+**Version**: 1.0.0  
+**Last Updated**: December 13, 2025  
+**Scope**: React 18 + Next.js 15 + TypeScript Full Stack  
+**Quality Level**: Enterprise Production-Ready
+
+---
+
+## TABLE OF CONTENTS (Quick Navigation)
+
+1. [Core Philosophy & Mindset](#core-philosophy--mindset)
+2. [TypeScript & Type Safety Rules](#typescript--type-safety-rules)
+3. [React Component Architecture](#react-component-architecture)
+4. [State Management Strategy](#state-management-strategy)
+5. [API Integration & Data Flow](#api-integration--data-flow)
+6. [Error Handling & Edge Cases](#error-handling--edge-cases)
+7. [Performance Optimization Rules](#performance-optimization-rules)
+8. [Animation & Visual Rules](#animation--visual-rules)
+9. [Responsive Design System](#responsive-design-system)
+10. [Accessibility & WCAG AA](#accessibility--wcag-aa)
+11. [Styling & Design Tokens](#styling--design-tokens)
+12. [File Organization & Structure](#file-organization--structure)
+13. [Testing & Quality Assurance](#testing--quality-assurance)
+14. [Security & Data Protection](#security--data-protection)
+15. [Next.js Specific Rules](#nextjs-specific-rules)
+16. [Common Patterns & Solutions](#common-patterns--solutions)
+17. [Anti-Patterns & Trap Prevention](#anti-patterns--trap-prevention)
+18. [Documentation & Comments](#documentation--comments)
+
+---
+
+## CORE PHILOSOPHY & MINDSET
+
+### 🎯 THE FIVE PILLARS OF FRONTEND EXCELLENCE
+
+**PILLAR 1: COMPLETENESS OVER PERFECTION**
+```
+Definition: Every piece of code is fully functional, production-ready.
+            No "we'll finish this later" or placeholder states.
+
+Rule: If you write it, it MUST be complete.
+      No TODOs, no FIXMEs, no "implement later".
+      If a feature isn't complete, don't write it yet.
+
+When to apply:
+- Components must render and work immediately
+- All error paths must be handled
+- All loading states must be implemented
+- All edge cases must be covered
+```
+
+**PILLAR 2: CORRECTNESS OVER CLEVERNESS**
+```
+Definition: Code clarity trumps sophisticated algorithms.
+            If it's clever, it's not clear enough.
+
+Rule: Write code for humans first, computers second.
+      A junior dev should understand your code without comments.
+      If you need comments to explain WHAT it does, simplify it.
+
+When to apply:
+- Naming: "processUserAuthToken" not "procUT"
+- Functions: 1 responsibility each, <20 lines
+- Logic: Direct paths before shortcuts
+- Variables: Explicit types, obvious intent
+```
+
+**PILLAR 3: TESTABILITY OVER COVERAGE%**
+```
+Definition: Code structure enables testing, not for coverage metrics.
+
+Rule: Structure code so it CAN be tested, even if you don't test it now.
+      Pure functions > side effects
+      Dependency injection > global imports
+      Props passing > implicit context access
+
+When to apply:
+- Components accept all needed data as props
+- API calls are in hooks, not in components
+- Business logic is in utilities, not in React
+- State changes are predictable and trackable
+```
+
+**PILLAR 4: MAINTAINABILITY OVER FEATURES**
+```
+Definition: Code that's easy to change > code that has more features.
+
+Rule: You'll spend 10x more time maintaining code than writing it.
+      Assume someone (maybe future you) will modify this in 6 months.
+      Make changes cheap and safe.
+
+When to apply:
+- Use constants instead of magic values
+- Use types instead of hope
+- Use clear names instead of abbreviations
+- Use explicit error handling instead of hope
+```
+
+**PILLAR 5: PERFORMANCE BY DESIGN, NOT AFTER**
+```
+Definition: Build performance in from start, don't optimize later.
+
+Rule: Performance is part of the design, not an afterthought.
+      60FPS is a requirement, not a goal.
+      Mobile performance is desktop performance.
+
+When to apply:
+- Use CSS transforms (GPU) not layout changes (CPU)
+- Memoize expensive components from the start
+- Lazy load heavy modules upfront
+- Debounce scroll/resize from day 1
+```
+
+### 🧠 THE MENTAL MODEL
+
+When writing ANY frontend code, ask yourself:
+
+```
+1. COMPLETE?     → Can someone use this immediately?
+2. CORRECT?      → Will a junior dev understand it?
+3. TESTABLE?     → Can this be tested in isolation?
+4. MAINTAINABLE? → Can someone modify this safely in 6 months?
+5. PERFORMANT?   → Will this run at 60FPS on low-end devices?
+
+If any answer is NO, stop and redesign.
+```
+
+---
+
+## TYPESCRIPT & TYPE SAFETY RULES
+
+### 🔒 STRICT MODE IS NON-NEGOTIABLE
+
+**Rule 1.1: tsconfig.json MUST have strict: true**
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "alwaysStrict": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
+```
+
+**Why**: Prevents 80% of runtime errors. Zero tolerance for `any`.
+
+---
+
+### 🔒 RULE 1.2: NO `any` TYPES - EVER
+
+**Incorrect**:
+```tsx
+function processData(data: any): any {
+  return data.value;  // ❌ Could be undefined, wrong type
+}
+
+const handleClick = (event: any) => {};  // ❌ What properties does it have?
+
+const users: any[] = [];  // ❌ No type checking
+```
+
+**Correct**:
+```tsx
+interface DataInput {
+  value: string;
+  count: number;
+  metadata?: Record<string, unknown>;
+}
+
+interface DataOutput {
+  processed: string;
+  result: number;
+}
+
+function processData(data: DataInput): DataOutput {
+  return {
+    processed: data.value.toUpperCase(),
+    result: data.count * 2,
+  };
+}
+
+const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  console.log(event.currentTarget.dataset.id);
+};
+
+const users: User[] = [];
+```
+
+**When to break**: NEVER. If you're tempted, redesign.
+
+---
+
+### 🔒 RULE 1.3: EVERY FUNCTION HAS INPUT/OUTPUT TYPES
+
+**Rule**: Every function must have:
+- Parameter types (all of them)
+- Return type (explicit, not inferred)
+- JSDoc with examples
+
+```tsx
+/**
+ * Formats a number as currency string
+ * @param amount - The number to format
+ * @param currency - Currency code (USD, EUR)
+ * @returns Formatted currency string with symbol
+ * @example
+ * formatCurrency(1234.56, 'USD') // Returns "$1,234.56"
+ */
+function formatCurrency(
+  amount: number,
+  currency: 'USD' | 'EUR' = 'USD'
+): string {
+  if (!Number.isFinite(amount)) {
+    return '$0.00';
+  }
+  
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency === 'EUR' ? 'EUR' : 'USD',
+  }).format(amount);
+}
+```
+
+---
+
+### 🔒 RULE 1.4: DISCRIMINATED UNIONS FOR STATE
+
+**Why**: TypeScript ensures you can't access data when it doesn't exist.
+
+**Incorrect**:
+```tsx
+interface State {
+  status: 'loading' | 'error' | 'success';
+  data?: Drift[];           // ❌ Could be undefined in any state
+  error?: string;           // ❌ Could be undefined in any state
+}
+
+// In component:
+if (state.status === 'success') {
+  state.data.map(...);  // ❌ data might still be undefined!
+}
+```
+
+**Correct**:
+```tsx
+type DriftState = 
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; drifts: Drift[]; total: number; page: number }
+  | { status: 'error'; error: Error; retry: () => Promise<void> };
+
+// In component:
+if (state.status === 'success') {
+  state.drifts.map(...);  // ✓ TypeScript guarantees drifts exists
+}
+
+if (state.status === 'error') {
+  state.error.message;    // ✓ TypeScript guarantees error exists
+  state.retry();          // ✓ retry method guaranteed
+}
+```
+
+---
+
+### 🔒 RULE 1.5: GENERIC TYPES FOR REUSABLE FUNCTIONS
+
+```tsx
+// ✓ CORRECT - Reusable, type-safe
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+async function fetchPaginated<T>(
+  endpoint: string,
+  page: number = 1
+): Promise<PaginatedResponse<T>> {
+  const response = await api.get<PaginatedResponse<T>>(endpoint, {
+    params: { page },
+  });
+  return response.data;
+}
+
+// Works with any data type:
+const drifts = await fetchPaginated<Drift>('/drifts');
+const alerts = await fetchPaginated<Alert>('/alerts');
+const users = await fetchPaginated<User>('/users');
+```
+
+---
+
+### 🔒 RULE 1.6: READONLY FOR IMMUTABILITY
+
+```tsx
+interface Props {
+  readonly drifts: readonly Drift[];  // ❌ Can't mutate
+  readonly onApprove: (id: string) => void;  // ❌ Can't reassign
+  readonly severity: 'critical' | 'warning' | 'info';  // ❌ Can't change
+}
+
+function DriftList(props: Readonly<Props>): React.ReactElement {
+  // props.drifts.push(...);  // ❌ TypeScript error
+  // props.severity = 'error'; // ❌ TypeScript error
+  
+  return (
+    <ul>
+      {props.drifts.map((drift) => (
+        <DriftItem key={drift.id} drift={drift} />
+      ))}
+    </ul>
+  );
+}
+```
+
+---
+
+### 🔒 RULE 1.7: CONST ASSERTIONS FOR LITERALS
+
+```tsx
+// ❌ WRONG - Types are too broad
+const SEVERITIES = ['critical', 'warning', 'info'];  // string[]
+const COLORS = { critical: '#FF0000', warning: '#FFA500' };  // Record<string, string>
+
+// ✓ CORRECT - Types are precise
+const SEVERITIES = ['critical', 'warning', 'info'] as const;
+type Severity = typeof SEVERITIES[number];  // 'critical' | 'warning' | 'info'
+
+const COLORS = { 
+  critical: '#FF0000', 
+  warning: '#FFA500' 
+} as const;
+type ColorKey = keyof typeof COLORS;  // 'critical' | 'warning'
+```
+
+---
+
+### 🔒 RULE 1.8: AVOID UTILITY TYPES OVERUSE
+
+**Keep it simple**:
+```tsx
+// ✓ GOOD - Clear, explicit
+type DriftWithoutId = Omit<Drift, 'id'>;
+
+// ✗ OVER-COMPLICATED - Hard to read
+type DriftPartial = Partial<Omit<Pick<Drift, 'resource' | 'type'>, 'id'>>;
+
+// If it's complicated, define it explicitly:
+interface DriftCreateRequest {
+  resource: string;
+  type: string;
+  // Don't include id, timestamp, etc.
+}
+```
+
+---
+
+## REACT COMPONENT ARCHITECTURE
+
+### 🏗️ RULE 2.1: COMPONENT HIERARCHY PRINCIPLE
+
+**Every component must answer these questions**:
+
+```
+1. RESPONSIBILITY: What ONE thing does this component do?
+   - If answer has "and" → split it
+   - Example: "Display a drift card and handle approval"
+     → Split: <DriftCard> + <ApprovalButton>
+
+2. DATA OWNERSHIP: Where does data come from?
+   - Props? Store? Context? API?
+   - Define clear data flow
+
+3. REUSABILITY: Can this be used elsewhere?
+   - If not, it's OK to be specific (page component)
+   - If yes, it must be generic
+
+4. TESTABILITY: Can this be tested in isolation?
+   - All dependencies must be injectable via props
+   - No global access (imports that reach outside)
+
+5. SIDE EFFECTS: Does this component cause side effects?
+   - useEffect? API calls? Event listeners?
+   - All must be tracked and cleaned up
+```
+
+---
+
+### 🏗️ RULE 2.2: COMPONENT STRUCTURE PATTERN
+
+```tsx
+// File: src/components/DriftCard.tsx
+
+// 1. IMPORTS (organized)
+import React from 'react';
+import { useMutation } from '@tanstack/react-query';
+import type { Drift } from '@/types/drift';
+import { driftApi } from '@/services/driftApi';
+import { Button } from './Button';
+import { cn } from '@/utils/cn';
+
+// 2. TYPES (specific to this component)
+interface DriftCardProps {
+  drift: Readonly<Drift>;
+  isSelected?: boolean;
+  onApprove: (driftId: string) => Promise<void>;
+  onReject: (driftId: string) => Promise<void>;
+  className?: string;
+}
+
+// 3. CONSTANTS (if any)
+const SEVERITY_COLORS = {
+  critical: 'bg-red-500',
+  warning: 'bg-yellow-500',
+  info: 'bg-blue-500',
+} as const;
+
+// 4. HELPER FUNCTIONS (pure, testable)
+function getSeverityColor(severity: Drift['severity']): string {
+  return SEVERITY_COLORS[severity] || 'bg-gray-500';
+}
+
+// 5. COMPONENT
+const DriftCard = React.forwardRef<HTMLDivElement, DriftCardProps>(
+  function DriftCard(
+    { drift, isSelected, onApprove, onReject, className },
+    ref
+  ) {
+    // 5a. Hooks (all at the top)
+    const approveMutation = useMutation({
+      mutationFn: onApprove,
+    });
+
+    const rejectMutation = useMutation({
+      mutationFn: onReject,
+    });
+
+    // 5b. Derived state
+    const isProcessing = approveMutation.isPending || rejectMutation.isPending;
+    const error = approveMutation.error || rejectMutation.error;
+
+    // 5c. Event handlers
+    const handleApprove = async () => {
+      try {
+        await approveMutation.mutateAsync(drift.id);
+      } catch (err) {
+        console.error('Approval failed:', err);
+      }
+    };
+
+    const handleReject = async () => {
+      try {
+        await rejectMutation.mutateAsync(drift.id);
+      } catch (err) {
+        console.error('Rejection failed:', err);
+      }
+    };
+
+    // 5d. Render
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'p-4 border rounded transition-all duration-200',
+          isSelected && 'ring-2 ring-blue-500',
+          className
+        )}
+      >
+        <h3 className="font-bold">{drift.resource}</h3>
+        <p className="text-sm text-gray-600">{drift.type}</p>
+        
+        <div className={cn('px-2 py-1 rounded text-xs text-white', getSeverityColor(drift.severity))}>
+          {drift.severity}
+        </div>
+
+        {error && (
+          <div className="mt-2 p-2 bg-red-100 text-red-600 rounded text-sm">
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </div>
+        )}
+
+        <div className="mt-4 flex gap-2">
+          <Button
+            onClick={handleApprove}
+            disabled={isProcessing}
+            variant="primary"
+            size="sm"
+          >
+            {approveMutation.isPending ? 'Approving...' : 'Approve'}
+          </Button>
+          
+          <Button
+            onClick={handleReject}
+            disabled={isProcessing}
+            variant="outline"
+            size="sm"
+          >
+            {rejectMutation.isPending ? 'Rejecting...' : 'Reject'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+);
+
+// 6. EXPORT with display name
+DriftCard.displayName = 'DriftCard';
+export default DriftCard;
+
+/**
+ * TEST CASES (document for testing):
+ * 
+ * 1. Renders drift resource name
+ *    Input: drift={driftMock}
+ *    Expected: Resource name visible
+ * 
+ * 2. Shows correct severity color
+ *    Input: drift.severity = "critical"
+ *    Expected: Red background applied
+ * 
+ * 3. Calls onApprove when approve button clicked
+ *    Input: onApprove mock, click approve
+ *    Expected: onApprove called with drift.id
+ * 
+ * 4. Disables buttons while processing
+ *    Input: Approve clicked, before promise resolves
+ *    Expected: Both buttons disabled, show loading text
+ * 
+ * 5. Shows error message on failure
+ *    Input: onApprove throws error
+ *    Expected: Error message displayed
+ * 
+ * 6. Responsive on mobile
+ *    Input: Viewport 375px
+ *    Expected: All content visible, no overflow
+ * 
+ * 7. Keyboard accessible
+ *    Input: Tab to approve button, press Enter
+ *    Expected: onApprove called
+ */
+```
+
+---
+
+### 🏗️ RULE 2.3: PROP INTERFACE PATTERN
+
+**Every component's props must follow this pattern**:
+
+```tsx
+// ✓ CORRECT
+interface CardProps {
+  // Data props (read-only)
+  title: string;
+  description?: string;
+  items: readonly Item[];
+  
+  // Callback props
+  onSelect?: (itemId: string) => void;
+  onDelete?: (itemId: string) => Promise<void>;
+  
+  // UI control props
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  variant?: 'primary' | 'secondary';
+  
+  // Style props (last)
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function Card(props: Readonly<CardProps>): React.ReactElement {
+  // Implementation
+}
+```
+
+**Why this order**:
+1. Data first (component's content)
+2. Callbacks (interactions)
+3. UI state (loading, disabled)
+4. Styling (presentation)
+
+---
+
+### 🏗️ RULE 2.4: FORWARDING REFS FOR UI COMPONENTS
+
+**All reusable UI components MUST support ref forwarding**:
+
+```tsx
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+}
+
+// Use React.forwardRef
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  function Input({ label, error, className, ...props }, ref) {
+    return (
+      <div>
+        {label && (
+          <label className="block mb-2 font-medium">
+            {label}
+            {props.required && <span className="text-red-500">*</span>}
+          </label>
+        )}
+        <input
+          ref={ref}
+          className={cn(
+            'px-3 py-2 border rounded focus:outline-none focus:ring-2',
+            error && 'border-red-500 focus:ring-red-500',
+            !error && 'border-gray-300 focus:ring-blue-500',
+            className
+          )}
+          {...props}
+        />
+        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      </div>
+    );
+  }
+);
+
+Input.displayName = 'Input';
+export default Input;
+
+// Usage:
+function Form() {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  
+  const handleFocus = () => {
+    inputRef.current?.focus();
+  };
+  
+  return (
+    <>
+      <Input ref={inputRef} label="Email" />
+      <button onClick={handleFocus}>Focus input</button>
+    </>
+  );
+}
+```
+
+---
+
+### 🏗️ RULE 2.5: COMPOUND COMPONENTS FOR COMPLEX UI
+
+**When one component needs internal state management**:
+
+```tsx
+// ✓ Use compound component pattern
+interface AccordionProps {
+  children: React.ReactNode;
+}
+
+interface AccordionItemProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+// Create context for sharing state
+const AccordionContext = React.createContext<{
+  openId: string | null;
+  setOpenId: (id: string | null) => void;
+}>({ openId: null, setOpenId: () => {} });
+
+export function Accordion({ children }: AccordionProps): React.ReactElement {
+  const [openId, setOpenId] = React.useState<string | null>(null);
+  
+  return (
+    <AccordionContext.Provider value={{ openId, setOpenId }}>
+      <div className="border rounded">{children}</div>
+    </AccordionContext.Provider>
+  );
+}
+
+export function AccordionItem({
+  title,
+  children,
+}: AccordionItemProps): React.ReactElement {
+  const { openId, setOpenId } = React.useContext(AccordionContext);
+  const itemId = React.useId();
+  const isOpen = openId === itemId;
+  
+  return (
+    <div className="border-t">
+      <button
+        onClick={() => setOpenId(isOpen ? null : itemId)}
+        className="w-full px-4 py-2 text-left font-medium hover:bg-gray-50"
+      >
+        {title}
+      </button>
+      {isOpen && <div className="px-4 py-2">{children}</div>}
+    </div>
+  );
+}
+
+// Usage:
+<Accordion>
+  <AccordionItem title="Section 1">Content 1</AccordionItem>
+  <AccordionItem title="Section 2">Content 2</AccordionItem>
+  <AccordionItem title="Section 3">Content 3</AccordionItem>
+</Accordion>
+```
+
+---
+
+### 🏗️ RULE 2.6: MEMOIZATION STRATEGY
+
+**Only memoize when you have a problem, not before**:
+
+```tsx
+// ❌ DON'T - Over-memoization
+const Button = React.memo(function Button({ onClick, children }) {
+  return <button onClick={onClick}>{children}</button>;
+});
+
+// ✓ DO - Memoize when needed
+const DriftList = React.memo(function DriftList({ drifts, onSelect }) {
+  return (
+    <div>
+      {drifts.map((drift) => (
+        <DriftCard
+          key={drift.id}
+          drift={drift}
+          onSelect={onSelect}
+        />
+      ))}
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Only re-render if drifts changed (by reference or deep check)
+  return prevProps.drifts === nextProps.drifts && 
+         prevProps.onSelect === nextProps.onSelect;
+});
+
+// ✓ USE useCallback for callbacks passed to memoized children
+function Page() {
+  const handleSelect = React.useCallback(
+    (driftId: string) => {
+      console.log('Selected:', driftId);
+    },
+    []  // No dependencies
+  );
+  
+  return <DriftList drifts={drifts} onSelect={handleSelect} />;
+}
+```
+
+**When to memoize**:
+- Component is in large list (100+ items)
+- Component does expensive calculations
+- Component uses expensive child components
+- Profiler shows unnecessary re-renders
+
+**Don't memoize**:
+- Simple components (<20 lines)
+- Components that rarely re-render
+- Components with many props (hard to track changes)
+
+---
+
+## STATE MANAGEMENT STRATEGY
+
+### 💾 RULE 3.1: STORE HIERARCHY
+
+**Organize global state into layers**:
+
+```tsx
+// Layer 1: UI State (Zustand - fast, light)
+useUIStore → isDarkMode, sidebarOpen, modalState
+
+// Layer 2: Auth State (Zustand - sensitive data)
+useAuthStore → user, token, permissions
+
+// Layer 3: Server State (React Query - automatic caching)
+useQuery → drifts, alerts, metrics, cost trends
+
+// Layer 4: Form State (local useState)
+useState → formData, formErrors, touched fields
+
+// Layer 5: Animation State (local useState)
+useState → isAnimating, animationPhase, etc.
+```
+
+**Rule**: Never duplicate server state in Zustand. React Query handles caching.
+
+---
+
+### 💾 RULE 3.2: ZUSTAND STORE PATTERN
+
+```tsx
+// src/store/useUIStore.ts
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface UIState {
+  // State
+  isDarkMode: boolean;
+  sidebarOpen: boolean;
+  activeTab: string;
+  
+  // Actions
+  toggleDarkMode: () => void;
+  setSidebarOpen: (open: boolean) => void;
+  setActiveTab: (tab: string) => void;
+}
+
+export const useUIStore = create<UIState>()(
+  persist(
+    (set) => ({
+      // Initial state
+      isDarkMode: false,
+      sidebarOpen: true,
+      activeTab: 'overview',
+      
+      // Actions - keep them simple
+      toggleDarkMode: () =>
+        set((state) => ({ isDarkMode: !state.isDarkMode })),
+      
+      setSidebarOpen: (open) =>
+        set({ sidebarOpen: open }),
+      
+      setActiveTab: (tab) =>
+        set({ activeTab: tab }),
+    }),
+    {
+      name: 'ui-store',
+      // Only persist certain values
+      partialize: (state) => ({
+        isDarkMode: state.isDarkMode,
+      }),
+    }
+  )
+);
+
+// Usage in component
+function Header() {
+  const { isDarkMode, toggleDarkMode } = useUIStore();
+  
+  return (
+    <header>
+      <button onClick={toggleDarkMode}>
+        {isDarkMode ? '☀️' : '🌙'}
+      </button>
+    </header>
+  );
+}
+```
+
+---
+
+### 💾 RULE 3.3: REACT QUERY FOR SERVER STATE
+
+**Never fetch in components. Use React Query hooks**:
+
+```tsx
+// src/hooks/useDrifts.ts
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/services/api';
+import type { Drift, PaginatedResponse } from '@/types';
+
+interface UseDriftsOptions {
+  page?: number;
+  limit?: number;
+  severity?: 'critical' | 'warning' | 'info';
+  enabled?: boolean;
+}
+
+export function useDrifts(options: UseDriftsOptions = {}) {
+  const {
+    page = 1,
+    limit = 20,
+    severity,
+    enabled = true,
+  } = options;
+  
+  return useQuery({
+    queryKey: ['drifts', page, limit, severity],
+    queryFn: async () => {
+      const response = await api.get<PaginatedResponse<Drift>>(
+        '/api/v1/drifts',
+        {
+          params: { page, limit, severity },
+        }
+      );
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,  // 5 minutes
+    gcTime: 10 * 60 * 1000,    // 10 minutes (formerly cacheTime)
+    retry: 2,
+    retryDelay: (attemptIndex) =>
+      Math.min(1000 * 2 ** attemptIndex, 30000),
+    enabled,
+  });
+}
+
+// Usage
+function DriftList() {
+  const { data, isLoading, error, refetch } = useDrifts({
+    page: 1,
+    limit: 20,
+  });
+  
+  if (isLoading) return <Spinner />;
+  if (error) return <Error message={error.message} onRetry={refetch} />;
+  
+  return (
+    <div>
+      {data?.items.map((drift) => (
+        <DriftCard key={drift.id} drift={drift} />
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+### 💾 RULE 3.4: LOCAL STATE PATTERN
+
+```tsx
+// Use useState for local, temporary state
+function SearchForm() {
+  const [query, setQuery] = React.useState('');
+  const [filters, setFilters] = React.useState({
+    severity: 'all' as const,
+    resourceType: '',
+  });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      // Do something
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      {/* More fields */}
+      <button disabled={isSubmitting}>
+        {isSubmitting ? 'Searching...' : 'Search'}
+      </button>
+      {error && <Error message={error} />}
+    </form>
+  );
+}
+```
+
+---
+
+## API INTEGRATION & DATA FLOW
+
+### 🔌 RULE 4.1: AXIOS CONFIGURATION
+
+```tsx
+// src/services/api.ts
+import axios, { AxiosInstance, AxiosError } from 'axios';
+import { logger } from './logger';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const REQUEST_TIMEOUT = 30000;
+
+export const api: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: REQUEST_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor
+api.interceptors.request.use(
+  (config) => {
+    // Add auth token
+    const token = typeof window !== 'undefined' 
+      ? localStorage.getItem('auth_token') 
+      : null;
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    return config;
+  },
+  (error) => {
+    logger.error('Request setup failed', { error });
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    const status = error.response?.status;
+    const data = error.response?.data as Record<string, any> | undefined;
+    
+    // Log error with context
+    logger.error('API error', {
+      status,
+      endpoint: error.config?.url,
+      message: data?.message,
+    });
+    
+    // Handle specific status codes
+    switch (status) {
+      case 401:
+        // Unauthorized - clear auth and redirect
+        localStorage.removeItem('auth_token');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(new Error('Session expired'));
+      
+      case 403:
+        return Promise.reject(new Error('You do not have permission'));
+      
+      case 429:
+        return Promise.reject(
+          new Error('Too many requests. Please try again later.')
+        );
+      
+      case 500:
+        return Promise.reject(
+          new Error('Server error. Our team has been notified.')
+        );
+      
+      case 0:
+        return Promise.reject(
+          new Error('Network error. Please check your connection.')
+        );
+      
+      default:
+        return Promise.reject(
+          new Error(
+            data?.message || 
+            error.message || 
+            'An unexpected error occurred'
+          )
+        );
+    }
+  }
+);
+```
+
+---
+
+### 🔌 RULE 4.2: DATA TYPES FOR API
+
+```tsx
+// src/types/api.ts
+export interface APIResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: Record<string, any>;
+  };
+  timestamp: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface APIError {
+  code: string;
+  message: string;
+  details?: Record<string, any>;
+}
+
+// Drift-specific
+export interface DriftResponse {
+  id: string;
+  resource: string;
+  type: string;
+  severity: 'critical' | 'warning' | 'info';
+  expectedState: Record<string, any>;
+  actualState: Record<string, any>;
+  difference: Record<string, any>;
+  detectedAt: string;
+  costImpact: number;
+}
+```
+
+---
+
+### 🔌 RULE 4.3: API SERVICE METHODS
+
+```tsx
+// src/services/driftApi.ts
+import { api } from './api';
+import type {
+  DriftResponse,
+  PaginatedResponse,
+  APIResponse,
+} from '@/types';
+
+export const driftApi = {
+  // Fetch list
+  async list(page: number = 1, limit: number = 20) {
+    const response = await api.get<PaginatedResponse<DriftResponse>>(
+      '/drifts',
+      { params: { page, limit } }
+    );
+    return response.data;
+  },
+  
+  // Fetch single
+  async get(id: string) {
+    const response = await api.get<DriftResponse>(`/drifts/${id}`);
+    return response.data;
+  },
+  
+  // Approve
+  async approve(id: string) {
+    const response = await api.post<APIResponse<{ id: string; status: string }>>(
+      `/drifts/${id}/approve`
+    );
+    return response.data;
+  },
+  
+  // Reject
+  async reject(id: string, reason?: string) {
+    const response = await api.post<APIResponse<{ id: string; status: string }>>(
+      `/drifts/${id}/reject`,
+      { reason }
+    );
+    return response.data;
+  },
+};
+```
+
+---
+
+## ERROR HANDLING & EDGE CASES
+
+### ⚠️ RULE 5.1: ERROR BOUNDARY PATTERN
+
+```tsx
+// src/components/ErrorBoundary.tsx
+interface Props {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  onError?: (error: Error) => void;
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+}
+
+export class ErrorBoundary extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    logger.error('React error boundary', {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+    });
+    
+    this.props.onError?.(error);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return (
+        this.props.fallback || (
+          <div className="p-8 bg-red-50 border border-red-200 rounded">
+            <h2 className="font-bold text-red-900">Something went wrong</h2>
+            <p className="text-red-700 mt-2">{this.state.error?.message}</p>
+            <button
+              onClick={() => this.setState({ hasError: false })}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded"
+            >
+              Try again
+            </button>
+          </div>
+        )
+      );
+    }
+    
+    return this.props.children;
+  }
+}
+```
+
+---
+
+### ⚠️ RULE 5.2: TRY-CATCH IN ASYNC FUNCTIONS
+
+```tsx
+// ❌ WRONG - Unhandled rejection
+async function approveDrift(id: string) {
+  const result = await api.post(`/drifts/${id}/approve`);
+  return result.data;
+}
+
+// ✓ CORRECT - Handled error
+async function approveDrift(id: string) {
+  try {
+    const result = await api.post<ApproveResponse>(`/drifts/${id}/approve`);
+    
+    if (!result.data) {
+      throw new Error('Invalid response from server');
+    }
+    
+    return result.data;
+  } catch (error) {
+    const message = error instanceof Error 
+      ? error.message 
+      : 'Failed to approve drift';
+    
+    logger.error('Drift approval failed', {
+      driftId: id,
+      error: message,
+    });
+    
+    throw error;
+  }
+}
+```
+
+---
+
+### ⚠️ RULE 5.3: HANDLE ALL LOADING/ERROR/EMPTY STATES
+
+```tsx
+function DriftList() {
+  const { data, isLoading, error } = useDrifts();
+  
+  // ✓ CORRECT - Handle all states
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-20 bg-gray-200 animate-pulse rounded" />
+        ))}
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="p-4 bg-red-100 border border-red-300 rounded">
+        <h3 className="font-bold text-red-900">Error loading drifts</h3>
+        <p className="text-red-700">{error.message}</p>
+        <button onClick={() => refetch()} className="mt-2 px-4 py-2 bg-red-600 text-white rounded">
+          Try again
+        </button>
+      </div>
+    );
+  }
+  
+  if (!data || data.items.length === 0) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-gray-500 mb-4">No drifts detected</p>
+        <p className="text-sm text-gray-400">Your infrastructure is in sync</p>
+      </div>
+    );
+  }
+  
+  // ✓ Render data
+  return (
+    <ul className="space-y-2">
+      {data.items.map((drift) => (
+        <DriftCard key={drift.id} drift={drift} />
+      ))}
+    </ul>
+  );
+}
+```
+
+---
+
+### ⚠️ RULE 5.4: FORM VALIDATION
+
+```tsx
+import { z } from 'zod';
+
+// Define schema
+const searchSchema = z.object({
+  query: z.string().min(1, 'Search query required'),
+  severity: z.enum(['all', 'critical', 'warning', 'info']),
+  limit: z.number().min(1).max(100),
+});
+
+type SearchInput = z.infer<typeof searchSchema>;
+
+function SearchForm() {
+  const [formData, setFormData] = React.useState<SearchInput>({
+    query: '',
+    severity: 'all',
+    limit: 20,
+  });
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    setIsSubmitting(true);
+    
+    try {
+      // Validate
+      const validated = searchSchema.parse(formData);
+      
+      // Submit
+      const result = await driftApi.search(validated);
+      
+      // Success
+      console.log('Search results:', result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Zod validation error
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          const path = err.path.join('.');
+          newErrors[path] = err.message;
+        });
+        setErrors(newErrors);
+      } else {
+        // Other error
+        setErrors({ submit: error instanceof Error ? error.message : 'Unknown error' });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={formData.query}
+        onChange={(e) => setFormData({ ...formData, query: e.target.value })}
+        aria-invalid={!!errors.query}
+        aria-describedby={errors.query ? 'query-error' : undefined}
+      />
+      {errors.query && (
+        <span id="query-error" className="text-red-600 text-sm">
+          {errors.query}
+        </span>
+      )}
+      
+      {/* More fields */}
+      
+      {errors.submit && (
+        <div className="p-3 bg-red-100 text-red-600 rounded">
+          {errors.submit}
+        </div>
+      )}
+      
+      <button disabled={isSubmitting} type="submit">
+        {isSubmitting ? 'Searching...' : 'Search'}
+      </button>
+    </form>
+  );
+}
+```
+
+---
+
+## PERFORMANCE OPTIMIZATION RULES
+
+### ⚡ RULE 6.1: 60FPS ANIMATION RULE
+
+**CSS Properties (GPU-accelerated)**:
+- `transform: translateX/Y/Z(), scale(), rotate()`
+- `opacity`
+- `filter`
+
+**NOT Animated** (CPU-bound, causes jank):
+- `width`, `height`, `margin`, `padding`
+- `left`, `top`, `position` (use `transform` instead)
+- `background-color` (use `opacity` + overlay)
+
+```tsx
+// ✗ WRONG - Animates layout (CPU)
+<motion.div
+  animate={{ width: isOpen ? 300 : 0 }}
+  transition={{ duration: 0.3 }}
+>
+  Sidebar
+</motion.div>
+
+// ✓ CORRECT - Animates transform (GPU)
+<motion.div
+  animate={{ scaleX: isOpen ? 1 : 0, transformOrigin: 'left' }}
+  transition={{ duration: 0.3 }}
+>
+  Sidebar
+</motion.div>
+
+// ✓ EVEN BETTER - CSS transitions
+<div
+  className="transition-transform duration-300 origin-left"
+  style={{ transform: isOpen ? 'scaleX(1)' : 'scaleX(0)' }}
+>
+  Sidebar
+</div>
+```
+
+---
+
+### ⚡ RULE 6.2: DEBOUNCE SCROLL/RESIZE
+
+```tsx
+import { useEffect, useRef } from 'react';
+
+export function useWindowSize() {
+  const [size, setSize] = React.useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+  });
+  
+  useEffect(() => {
+    const timeoutRef = { current: null as NodeJS.Timeout | null };
+    
+    const handleResize = () => {
+      // Clear previous timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      // Debounce resize handler
+      timeoutRef.current = setTimeout(() => {
+        setSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }, 150);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+  
+  return size;
+}
+
+// Usage
+function ResponsiveComponent() {
+  const { width } = useWindowSize();
+  const isTablet = width < 1024;
+  
+  return isTablet ? <MobileLayout /> : <DesktopLayout />;
+}
+```
+
+---
+
+### ⚡ RULE 6.3: LAZY LOAD COMPONENTS
+
+```tsx
+// src/app/page.tsx
+import dynamic from 'next/dynamic';
+
+// Lazy load heavy components
+const HeroSection = dynamic(
+  () => import('@/components/sections/HeroSection'),
+  {
+    loading: () => <div className="h-screen bg-gray-100 animate-pulse" />,
+    ssr: false,  // Don't render on server
+  }
+);
+
+const CostChart = dynamic(
+  () => import('@/components/sections/CostChart'),
+  {
+    loading: () => <div className="h-64 bg-gray-100 animate-pulse" />,
+  }
+);
+
+export default function Dashboard() {
+  return (
+    <div>
+      <HeroSection />  {/* Lazy loaded */}
+      <DriftCards />   {/* Regular component */}
+      <CostChart />    {/* Lazy loaded */}
+    </div>
+  );
+}
+```
+
+---
+
+### ⚡ RULE 6.4: IMAGE OPTIMIZATION
+
+```tsx
+import Image from 'next/image';
+
+// ✗ WRONG - Unoptimized
+<img src="/hero.png" alt="Hero" />
+
+// ✓ CORRECT - Optimized with Next.js Image
+<Image
+  src="/hero.png"
+  alt="Infrastructure monitoring dashboard"
+  width={1200}
+  height={600}
+  priority  // Load immediately (only for above-fold)
+  className="w-full h-auto"
+  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+/>
+
+// For background images
+<div
+  className="h-96"
+  style={{
+    backgroundImage: 'url(/pattern.png)',
+    backgroundSize: 'cover',
+  }}
+>
+  {/* Or use CSS class */}
+</div>
+```
+
+---
+
+### ⚡ RULE 6.5: CODE SPLITTING AT ROUTES
+
+```tsx
+// Next.js automatically code-splits at page boundaries
+// Each page (app/page.tsx, app/drift/[id]/page.tsx, etc.)
+// is automatically code-split
+
+// But you can also manually split:
+import dynamic from 'next/dynamic';
+
+const AdminPanel = dynamic(
+  () => import('@/components/AdminPanel'),
+  { ssr: false }
+);
+
+function Dashboard() {
+  const { isAdmin } = useAuth();
+  
+  return (
+    <div>
+      <DriftList />
+      {isAdmin && <AdminPanel />}  {/* Only loaded if admin */}
+    </div>
+  );
+}
+```
+
+---
+
+### ⚡ RULE 6.6: BUNDLE SIZE MONITORING
+
+```bash
+# Check bundle size
+npm run build
+
+# Analyze bundle (if using @next/bundle-analyzer)
+ANALYZE=true npm run build
+
+# Target: <100KB JS gzipped for initial page
+```
+
+---
+
+## ANIMATION & VISUAL RULES
+
+### 🎨 RULE 7.1: ANIMATION TIMING CONSTANTS
+
+```tsx
+// src/config/animations.ts
+export const ANIMATION_TIMING = {
+  // Micro-interactions (fast feedback)
+  MICRO: 100,        // Button press, toggle
+  
+  // Standard transitions
+  FAST: 200,         // Hover effects
+  NORMAL: 300,       // Page transitions, modals
+  SLOW: 500,         // Emphasis animations
+  
+  // Hero/entrance animations
+  ENTRANCE: 600,     // Component entrance
+  
+  // Scroll-triggered
+  SCROLL_DEBOUNCE: 16,  // ~60FPS
+} as const;
+
+export const EASING = {
+  // Standard easing
+  LINEAR: 'linear',
+  EASE_IN: 'ease-in',
+  EASE_OUT: 'ease-out',
+  EASE_IN_OUT: 'ease-in-out',
+  
+  // Custom cubic-bezier
+  // Fast entrance, slight overshoot
+  ENTRANCE: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+  // Natural motion
+  NATURAL: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+  // Smooth deceleration
+  DECELERATE: 'cubic-bezier(0, 0, 0.2, 1)',
+} as const;
+```
+
+---
+
+### 🎨 RULE 7.2: STAGGER ANIMATIONS FOR LISTS
+
+```tsx
+import { ANIMATION_TIMING } from '@/config/animations';
+
+function DriftList({ drifts }: Props) {
+  return (
+    <ul className="space-y-4">
+      {drifts.map((drift, index) => (
+        <li
+          key={drift.id}
+          className="animate-fade-in-up"
+          style={{
+            // Stagger animation: each item delayed by 100ms
+            animationDelay: `${index * 100}ms`,
+            animationFillMode: 'both',
+          }}
+        >
+          <DriftCard drift={drift} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// In global CSS
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 400ms ease-out;
+}
+```
+
+---
+
+### 🎨 RULE 7.3: FOCUS STATES FOR ACCESSIBILITY
+
+```tsx
+export function Button(props: ButtonProps) {
+  return (
+    <button
+      {...props}
+      className={cn(
+        'px-4 py-2 rounded font-medium',
+        'transition-all duration-200',
+        'focus-visible:outline-2 focus-visible:outline-offset-2',
+        'focus-visible:outline-blue-500',
+        'hover:bg-blue-600',
+        'active:scale-95',
+        props.className
+      )}
+    />
+  );
+}
+```
+
+---
+
+## RESPONSIVE DESIGN SYSTEM
+
+### 📱 RULE 8.1: BREAKPOINTS
+
+```tsx
+// src/config/breakpoints.ts
+export const BREAKPOINTS = {
+  MOBILE: 375,    // Mobile: iPhone SE
+  MOBILE_LG: 425, // Mobile: Large phones
+  TABLET: 768,    // Tablet: iPad
+  DESKTOP: 1024,  // Desktop: minimum
+  DESKTOP_LG: 1280,  // Desktop: large
+  DESKTOP_XL: 1536,  // Desktop: extra large
+} as const;
+
+// Tailwind classes
+sm: 640px   (use for mobile adjustments)
+md: 768px   (use for tablet)
+lg: 1024px  (use for desktop)
+xl: 1280px  (use for large desktop)
+2xl: 1536px (use for extra large)
+```
+
+---
+
+### 📱 RULE 8.2: MOBILE-FIRST CSS
+
+```tsx
+// ✓ CORRECT - Mobile first
+<div className="
+  w-full
+  md:w-1/2
+  lg:w-1/3
+  px-4
+  md:px-6
+  lg:px-8
+">
+  {/* Mobile: 100% width, 16px padding */}
+  {/* Tablet: 50% width, 24px padding */}
+  {/* Desktop: 33% width, 32px padding */}
+</div>
+
+// ✗ WRONG - Desktop first
+<div className="
+  w-1/3
+  lg:w-1/2
+  md:w-full
+">
+  {/* Hard to read, wrong order */}
+</div>
+```
+
+---
+
+### 📱 RULE 8.3: TOUCH TARGETS
+
+**Minimum 44x44px on mobile**:
+
+```tsx
+export function Button(props: ButtonProps) {
+  return (
+    <button
+      {...props}
+      className={cn(
+        'px-4 py-2',
+        'min-h-[44px]',      // Touch target height
+        'min-w-[44px]',      // Touch target width
+        'md:min-h-[40px]',   // Smaller on desktop
+        props.className
+      )}
+    />
+  );
+}
+```
+
+---
+
+### 📱 RULE 8.4: RESPONSIVE COMPONENTS
+
+```tsx
+// Sidebar hidden on mobile, visible on desktop
+export function Layout({ children }: Props) {
+  return (
+    <div className="flex">
+      <aside className="
+        hidden
+        lg:block
+        w-64
+        bg-gray-900
+        text-white
+      ">
+        <Navigation />
+      </aside>
+      
+      <main className="flex-1">{children}</main>
+    </div>
+  );
+}
+
+// Mobile menu drawer
+function MobileMenu() {
+  const [isOpen, setIsOpen] = React.useState(false);
+  
+  return (
+    <>
+      {/* Hamburger on mobile only */}
+      <button
+        className="lg:hidden"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        ☰
+      </button>
+      
+      {/* Drawer */}
+      {isOpen && (
+        <div className="
+          fixed
+          inset-0
+          bg-white
+          z-50
+          lg:hidden
+        ">
+          <Navigation onNavigate={() => setIsOpen(false)} />
+        </div>
+      )}
+    </>
+  );
+}
+```
+
+---
+
+## ACCESSIBILITY & WCAG AA
+
+### ♿ RULE 9.1: SEMANTIC HTML
+
+```tsx
+// ✓ CORRECT
+<header className="bg-white shadow">
+  <nav className="container">
+    <a href="/">Logo</a>
+    <ul>
+      <li><a href="/drifts">Drifts</a></li>
+      <li><a href="/alerts">Alerts</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main className="container">
+  <article>
+    <h1>Drift Details</h1>
+    <section>
+      <h2>Monitoring</h2>
+      {/* Content */}
+    </section>
+  </article>
+</main>
+
+<footer className="bg-gray-900 text-white">
+  <p>&copy; 2025 CloudDrift Guardian</p>
+</footer>
+
+// ✗ WRONG
+<div className="header">
+  <div className="nav">
+    <div className="link">Logo</div>
+    <div className="link">Drifts</div>
+  </div>
+</div>
+```
+
+---
+
+### ♿ RULE 9.2: HEADING HIERARCHY
+
+```tsx
+// ✓ CORRECT - Proper hierarchy
+<h1>CloudDrift Guardian</h1>       {/* Page title */}
+<h2>Dashboard</h2>                 {/* Main section */}
+<h3>Recent Drifts</h3>             {/* Subsection */}
+
+// ✗ WRONG - Skipping levels
+<h1>Title</h1>
+<h3>Subsection</h3>  {/* Should be h2! */}
+
+// ✗ WRONG - Multiple h1s
+<h1>Page</h1>
+<h1>Section</h1>  {/* Should be h2! */}
+```
+
+---
+
+### ♿ RULE 9.3: FORM LABELS
+
+```tsx
+// ✓ CORRECT
+<label htmlFor="email">Email address</label>
+<input
+  id="email"
+  type="email"
+  required
+  aria-required="true"
+  aria-describedby={error ? 'email-error' : undefined}
+/>
+{error && (
+  <span id="email-error" className="text-red-600 text-sm" role="alert">
+    {error}
+  </span>
+)}
+
+// ✗ WRONG - No label
+<input type="email" placeholder="Email" />
+
+// ✗ WRONG - Floating label not associated
+<input type="email" />
+<div>Email address</div>
+```
+
+---
+
+### ♿ RULE 9.4: KEYBOARD NAVIGATION
+
+```tsx
+// ✓ CORRECT - Full keyboard support
+function Dropdown({ items }: Props) {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex((i) => (i + 1) % items.length);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex((i) => (i - 1 + items.length) % items.length);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        selectItem(items[selectedIndex]);
+        setIsOpen(false);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsOpen(false);
+        break;
+    }
+  };
+  
+  return (
+    <div onKeyDown={handleKeyDown}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+      >
+        {selectedItem?.label}
+      </button>
+      {isOpen && (
+        <ul role="listbox">
+          {items.map((item, i) => (
+            <li
+              key={item.id}
+              role="option"
+              aria-selected={i === selectedIndex}
+              className={i === selectedIndex ? 'bg-blue-100' : ''}
+            >
+              {item.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+### ♿ RULE 9.5: COLOR CONTRAST
+
+```tsx
+// Check contrast ratio: https://webaim.org/resources/contrastchecker/
+
+// ✓ GOOD - 4.5:1 ratio (normal text)
+<div className="text-gray-900 bg-white">Dark text on light</div>
+
+// ✓ GOOD - 3:1 ratio (large text 18px+)
+<h1 className="text-gray-700 bg-white text-xl">Heading on light</h1>
+
+// ✗ POOR - < 3:1 ratio
+<div className="text-gray-400 bg-white">Light gray on white - hard to read</div>
+
+// Use design system colors with verified contrast
+export const COLORS = {
+  TEXT_ON_LIGHT: '#1a1a2e',    // Dark text
+  TEXT_ON_DARK: '#e8e8ff',     // Light text
+  BORDER: '#ffd700',           // Gold
+} as const;
+```
+
+---
+
+### ♿ RULE 9.6: ARIA ATTRIBUTES
+
+```tsx
+// Modal with focus trap
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+  className="fixed inset-0 z-50"
+>
+  <h2 id="modal-title">Confirm Approval</h2>
+  <p>Are you sure you want to approve this drift?</p>
+  <button>Cancel</button>
+  <button>Approve</button>
+</div>
+
+// Icon button (no visible label)
+<button
+  aria-label="Toggle dark mode"
+  onClick={toggleDarkMode}
+>
+  🌙
+</button>
+
+// Alert live region (announces changes)
+<div
+  role="alert"
+  aria-live="polite"
+  className="p-4 bg-green-100"
+>
+  Drift approved successfully!
+</div>
+```
+
+---
+
+## STYLING & DESIGN TOKENS
+
+### 🎨 RULE 10.1: DESIGN TOKENS
+
+```tsx
+// src/config/designTokens.ts
+export const DESIGN_TOKENS = {
+  // Colors
+  COLORS: {
+    // Primary palette
+    GOLD_600: '#FFD700',
+    GOLD_700: '#FFC700',
+    TEAL_400: '#00D9FF',
+    TEAL_600: '#008899',
+    PURPLE_600: '#9D4EDD',
+    
+    // Semantic colors
+    SUCCESS: '#10B981',
+    WARNING: '#F59E0B',
+    ERROR: '#EF4444',
+    INFO: '#3B82F6',
+    
+    // Neutrals
+    DARK_BG: '#0A0E27',
+    LIGHT_BG: '#F5F7FA',
+    DARK_TEXT: '#1A1A2E',
+    LIGHT_TEXT: '#E8E8FF',
+  },
+  
+  // Spacing
+  SPACING: {
+    XS: '4px',
+    SM: '8px',
+    MD: '16px',
+    LG: '24px',
+    XL: '32px',
+    2XL: '48px',
+  },
+  
+  // Typography
+  TYPOGRAPHY: {
+    // Display
+    DISPLAY_LG: { size: '36px', weight: 700, lineHeight: 1.2 },
+    DISPLAY_MD: { size: '30px', weight: 600, lineHeight: 1.3 },
+    
+    // Heading
+    HEADING_LG: { size: '24px', weight: 600, lineHeight: 1.3 },
+    HEADING_MD: { size: '20px', weight: 600, lineHeight: 1.4 },
+    HEADING_SM: { size: '18px', weight: 600, lineHeight: 1.4 },
+    
+    // Body
+    BODY_LG: { size: '16px', weight: 400, lineHeight: 1.5 },
+    BODY_MD: { size: '14px', weight: 400, lineHeight: 1.5 },
+    BODY_SM: { size: '12px', weight: 400, lineHeight: 1.5 },
+    
+    // Caption
+    CAPTION: { size: '12px', weight: 400, lineHeight: 1.4 },
+  },
+  
+  // Shadows
+  SHADOWS: {
+    SM: '0 1px 2px rgba(0,0,0,0.05)',
+    MD: '0 4px 6px rgba(0,0,0,0.1)',
+    LG: '0 10px 15px rgba(0,0,0,0.2)',
+    GLOW: '0 0 20px rgba(0, 217, 255, 0.3)',
+    GLOW_GOLD: '0 0 15px rgba(255, 215, 0, 0.2)',
+  },
+  
+  // Border radius
+  RADIUS: {
+    SM: '4px',
+    MD: '8px',
+    LG: '12px',
+    FULL: '9999px',
+  },
+} as const;
+```
+
+---
+
+### 🎨 RULE 10.2: TAILWIND CONFIGURATION
+
+```typescript
+// tailwind.config.ts
+import type { Config } from 'tailwindcss';
+
+export default {
+  content: [
+    './src/app/**/*.{js,ts,jsx,tsx}',
+    './src/components/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        gold: {
+          600: '#FFD700',
+          700: '#FFC700',
+        },
+        teal: {
+          400: '#00D9FF',
+          600: '#008899',
+        },
+        purple: {
+          600: '#9D4EDD',
+        },
+      },
+      spacing: {
+        xs: '4px',
+        sm: '8px',
+        md: '16px',
+        lg: '24px',
+        xl: '32px',
+      },
+      fontSize: {
+        display: ['36px', { lineHeight: '1.2' }],
+        heading: ['24px', { lineHeight: '1.3' }],
+        body: ['14px', { lineHeight: '1.5' }],
+      },
+      boxShadow: {
+        glow: '0 0 20px rgba(0, 217, 255, 0.3)',
+        'glow-gold': '0 0 15px rgba(255, 215, 0, 0.2)',
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;
+```
+
+---
+
+### 🎨 RULE 10.3: DARK MODE
+
+```tsx
+// src/hooks/useDarkMode.ts
+export function useDarkMode() {
+  const { isDarkMode, toggleDarkMode } = useUIStore();
+  
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+  
+  return { isDarkMode, toggleDarkMode };
+}
+
+// Usage in component
+function Card() {
+  useDarkMode();  // Apply classes
+  
+  return (
+    <div className="
+      bg-white dark:bg-gray-900
+      text-gray-900 dark:text-white
+      border-gray-200 dark:border-gray-700
+    ">
+      Content
+    </div>
+  );
+}
+```
+
+---
+
+## FILE ORGANIZATION & STRUCTURE
+
+### 📂 RULE 11.1: FOLDER STRUCTURE
+
+```
+frontend/
+├── .cursor/
+│   └── rules/
+│       └── vibe-coding-rules.mdc
+│
+├── src/
+│   ├── app/                    # Next.js pages
+│   │   ├── layout.tsx
+│   │   ├── page.tsx           # Dashboard
+│   │   ├── drift/
+│   │   │   └── [id]/
+│   │   │       └── page.tsx
+│   │   ├── settings/
+│   │   │   └── page.tsx
+│   │   └── error.tsx
+│   │
+│   ├── components/
+│   │   ├── common/            # Reusable UI
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Spinner.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── layout/            # Page layout
+│   │   │   ├── Header.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── sections/          # Page sections
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── DriftCards.tsx
+│   │   │   ├── CostChart.tsx
+│   │   │   ├── AlertsSidebar.tsx
+│   │   │   ├── Timeline.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   └── index.ts           # Barrel export
+│   │
+│   ├── hooks/                 # Custom React hooks
+│   │   ├── useDrifts.ts
+│   │   ├── useCostTrend.ts
+│   │   ├── useAlerts.ts
+│   │   ├── useDarkMode.ts
+│   │   └── index.ts
+│   │
+│   ├── services/              # API services
+│   │   ├── api.ts            # Axios instance
+│   │   ├── driftApi.ts
+│   │   ├── metricsApi.ts
+│   │   ├── logger.ts
+│   │   └── index.ts
+│   │
+│   ├── store/                 # Zustand stores
+│   │   ├── useUIStore.ts
+│   │   ├── useAuthStore.ts
+│   │   └── index.ts
+│   │
+│   ├── types/                 # TypeScript types
+│   │   ├── drift.ts
+│   │   ├── api.ts
+│   │   ├── ui.ts
+│   │   └── index.ts
+│   │
+│   ├── styles/                # Global styles
+│   │   ├── globals.css
+│   │   ├── animations.css
+│   │   └── tailwind.css
+│   │
+│   ├── utils/                 # Utility functions
+│   │   ├── cn.ts             # Classname merger
+│   │   ├── format.ts         # Formatting functions
+│   │   └── api-helpers.ts
+│   │
+│   └── config/                # Configuration
+│       ├── constants.ts
+│       ├── designTokens.ts
+│       ├── colors.ts
+│       └── api.config.ts
+│
+├── public/                    # Static assets
+│   ├── images/
+│   ├── icons/
+│   └── fonts/
+│
+├── .env.example               # Environment variables
+├── .gitignore
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
+└── README.md
+```
+
+---
+
+### 📂 RULE 11.2: BARREL EXPORTS
+
+```tsx
+// src/components/index.ts
+export { default as Button } from './common/Button';
+export { default as Card } from './common/Card';
+export { default as Input } from './common/Input';
+export { default as Modal } from './common/Modal';
+export { default as Spinner } from './common/Spinner';
+
+export { default as Header } from './layout/Header';
+export { default as Sidebar } from './layout/Sidebar';
+export { default as Footer } from './layout/Footer';
+
+export { default as HeroSection } from './sections/HeroSection';
+export { default as DriftCards } from './sections/DriftCards';
+export { default as CostChart } from './sections/CostChart';
+export { default as AlertsSidebar } from './sections/AlertsSidebar';
+export { default as Timeline } from './sections/Timeline';
+
+// Usage
+import { Button, Card, DriftCards } from '@/components';
+```
+
+---
+
+### 📂 RULE 11.3: NAMING CONVENTIONS
+
+```
+Components:     PascalCase (Button.tsx, DriftCard.tsx)
+Hooks:          camelCase, start with use (useDrifts.ts, useFetch.ts)
+Types/Interfaces: PascalCase (Drift.ts, APIResponse.ts)
+Constants:      UPPER_SNAKE_CASE (MAX_RETRIES, API_TIMEOUT)
+Utilities:      camelCase (cn.ts, format.ts, parseError.ts)
+Stores:         useXxxStore pattern (useUIStore, useAuthStore)
+Styles:         kebab-case in Tailwind (text-gray-900, bg-blue-50)
+```
+
+---
+
+## TESTING & QUALITY ASSURANCE
+
+### ✅ RULE 12.1: TEST CASES IN COMMENTS
+
+Every component must document test cases:
+
+```tsx
+/**
+ * DriftCard - Display component for a single infrastructure drift
+ *
+ * Displays drift information with approval/rejection actions.
+ *
+ * TEST CASES:
+ * 1. Renders drift data correctly
+ *    Input: drift={driftMock}
+ *    Expected: Resource name, type, severity visible
+ *
+ * 2. Shows severity color
+ *    Input: drift.severity="critical"
+ *    Expected: Red background applied
+ *
+ * 3. Calls onApprove when approve clicked
+ *    Input: onApprove mock, click button
+ *    Expected: onApprove called with drift.id
+ *
+ * 4. Disables actions while processing
+ *    Input: onApprove is slow, click before complete
+ *    Expected: Both buttons disabled, loading text shown
+ *
+ * 5. Displays error on failure
+ *    Input: onApprove throws Error
+ *    Expected: Error message displayed
+ *
+ * 6. Responsive on mobile
+ *    Input: Viewport 375px
+ *    Expected: All content visible, no overflow
+ *
+ * 7. Keyboard accessible
+ *    Input: Tab to button, press Enter
+ *    Expected: Callback executed
+ */
+```
+
+---
+
+### ✅ RULE 12.2: TESTING PATTERNS
+
+```tsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { DriftCard } from './DriftCard';
+
+describe('DriftCard', () => {
+  it('renders drift data', () => {
+    render(<DriftCard drift={driftMock} />);
+    expect(screen.getByText(driftMock.resource)).toBeInTheDocument();
+  });
+  
+  it('calls onApprove when button clicked', async () => {
+    const handleApprove = vi.fn();
+    render(
+      <DriftCard drift={driftMock} onApprove={handleApprove} />
+    );
+    
+    await userEvent.click(screen.getByText('Approve'));
+    expect(handleApprove).toHaveBeenCalledWith(driftMock.id);
+  });
+});
+```
+
+---
+
+## SECURITY & DATA PROTECTION
+
+### 🔒 RULE 13.1: NEVER EXPOSE SECRETS
+
+```tsx
+// ✗ WRONG - Secrets in client code
+const API_KEY = 'sk-1234567890abcdef';
+const DB_PASSWORD = 'myPassword123';
+
+// ✓ CORRECT - Use environment variables
+// .env.local (never commit)
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+API_KEY=sk-secret   // Server-only
+
+// src/config/api.ts
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// Backend API call (on server)
+const apiKey = process.env.API_KEY;
+```
+
+---
+
+### 🔒 RULE 13.2: SANITIZE USER INPUT
+
+```tsx
+// ✗ WRONG - XSS vulnerability
+<div>{userData.bio}</div>
+
+// ✓ CORRECT - Use textContent
+<div>{userData.bio}</div>  // React auto-escapes by default
+
+// For HTML content, use DOMPurify
+import DOMPurify from 'dompurify';
+
+const cleanHTML = DOMPurify.sanitize(userHTML);
+<div dangerouslySetInnerHTML={{ __html: cleanHTML }} />
+```
+
+---
+
+### 🔒 RULE 13.3: CSRF PROTECTION
+
+```tsx
+// Ensure POST/PUT/DELETE include CSRF token
+import { api } from '@/services/api';
+
+// Axios interceptor adds token automatically
+api.interceptors.request.use((config) => {
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  if (token) {
+    config.headers['X-CSRF-Token'] = token;
+  }
+  return config;
+});
+```
+
+---
+
+## NEXTJS SPECIFIC RULES
+
+### 🚀 RULE 14.1: APP ROUTER PATTERNS
+
+```tsx
+// src/app/layout.tsx - Root layout
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'CloudDrift Guardian',
+  description: 'Infrastructure drift detection dashboard',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html>
+      <head />
+      <body>{children}</body>
+    </html>
+  );
+}
+
+// src/app/page.tsx - Home page
+export default function Home() {
+  return <Dashboard />;
+}
+
+// src/app/drift/[id]/page.tsx - Dynamic route
+interface Props {
+  params: { id: string };
+}
+
+export default function DriftPage({ params }: Props) {
+  return <DriftDetails id={params.id} />;
+}
+```
+
+---
+
+### 🚀 RULE 14.2: SERVER vs CLIENT COMPONENTS
+
+```tsx
+// ✗ SERVER COMPONENT (uses async)
+async function Dashboard() {
+  const drifts = await fetchDrifts();
+  return <DriftList drifts={drifts} />;
+}
+
+// ✓ CLIENT COMPONENT (uses hooks)
+'use client';
+
+import { useDrifts } from '@/hooks/useDrifts';
+
+export function Dashboard() {
+  const { data } = useDrifts();
+  return <DriftList drifts={data?.items || []} />;
+}
+```
+
+---
+
+### 🚀 RULE 14.3: IMAGE OPTIMIZATION
+
+```tsx
+import Image from 'next/image';
+
+// ✓ CORRECT
+<Image
+  src="/hero.png"
+  alt="Dashboard"
+  width={1200}
+  height={600}
+  priority  // For above-fold images
+  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+/>
+```
+
+---
+
+## COMMON PATTERNS & SOLUTIONS
+
+### 🎯 PATTERN 1: Loading States
+
+```tsx
+type LoadingState<T> = 
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: Error };
+
+function useAsyncData<T>(
+  asyncFn: () => Promise<T>
+): LoadingState<T> {
+  const [state, setState] = React.useState<LoadingState<T>>({
+    status: 'idle',
+  });
+  
+  React.useEffect(() => {
+    setState({ status: 'loading' });
+    asyncFn()
+      .then((data) => setState({ status: 'success', data }))
+      .catch((error) => setState({ status: 'error', error }));
+  }, [asyncFn]);
+  
+  return state;
+}
+```
+
+---
+
+### 🎯 PATTERN 2: Pagination
+
+```tsx
+interface UsePaginationOptions {
+  pageSize?: number;
+}
+
+export function usePagination(options: UsePaginationOptions = {}) {
+  const { pageSize = 20 } = options;
+  const [page, setPage] = React.useState(1);
+  
+  return {
+    page,
+    pageSize,
+    goToPage: setPage,
+    nextPage: () => setPage((p) => p + 1),
+    prevPage: () => setPage((p) => Math.max(1, p - 1)),
+  };
+}
+
+// Usage
+function DriftList() {
+  const pagination = usePagination({ pageSize: 20 });
+  const { data } = useDrifts({ page: pagination.page, limit: pagination.pageSize });
+  
+  return (
+    <>
+      {/* Display drifts */}
+      <button onClick={pagination.prevPage}>Previous</button>
+      <span>Page {pagination.page}</span>
+      <button onClick={pagination.nextPage}>Next</button>
+    </>
+  );
+}
+```
+
+---
+
+### 🎯 PATTERN 3: Debounced Search
+
+```tsx
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = React.useState(value);
+  
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    
+    return () => clearTimeout(timeout);
+  }, [value, delay]);
+  
+  return debouncedValue;
+}
+
+// Usage
+function SearchDrifts() {
+  const [query, setQuery] = React.useState('');
+  const debouncedQuery = useDebounce(query, 300);
+  const { data } = useDrifts({ query: debouncedQuery });
+  
+  return (
+    <>
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search drifts..."
+      />
+      {/* Results */}
+    </>
+  );
+}
+```
+
+---
+
+## ANTI-PATTERNS & TRAP PREVENTION
+
+### ⛔ RULE 15.1: PROP DRILLING TRAP
+
+```tsx
+// ⛔ WRONG - Prop drilling 5 levels deep
+<GrandParent isDarkMode={isDarkMode} />
+<Parent isDarkMode={isDarkMode} />
+<Child isDarkMode={isDarkMode} />
+<GrandChild isDarkMode={isDarkMode} />
+<GreatGrandChild isDarkMode={isDarkMode} />
+
+// ✅ CORRECT - Use store
+export function GreatGrandChild() {
+  const { isDarkMode } = useUIStore();
+  return <div className={isDarkMode ? 'dark' : ''}>{/* content */}</div>;
+}
+```
+
+---
+
+### ⛔ RULE 15.2: MISSING DEPENDENCY TRAP
+
+```tsx
+// ⛔ WRONG - Fetches on every render
+React.useEffect(() => {
+  fetchData();
+});
+
+// ✅ CORRECT - Fetch once
+React.useEffect(() => {
+  fetchData();
+}, []);
+
+// ✅ CORRECT - Fetch when page changes
+React.useEffect(() => {
+  fetchData(page);
+}, [page]);
+```
+
+---
+
+### ⛔ RULE 15.3: INFINITE LOOP TRAP
+
+```tsx
+// ⛔ WRONG - Infinite loop
+const handleSelect = () => {
+  setItems([...items, newItem]);  // items included in dependencies
+};
+
+React.useEffect(() => {
+  handleSelect();
+}, [items]);  // Triggers on every render
+
+// ✓ CORRECT
+const handleSelect = React.useCallback(() => {
+  setItems((prevItems) => [...prevItems, newItem]);
+}, []);
+
+React.useEffect(() => {
+  handleSelect();
+}, [handleSelect]);
+```
+
+---
+
+### ⛔ RULE 15.4: STALE STATE TRAP
+
+```tsx
+// ⛔ WRONG - Stale closure
+function Component() {
+  const [count, setCount] = React.useState(0);
+  
+  const handleClick = () => {
+    setTimeout(() => {
+      console.log(count);  // Always logs 0!
+    }, 1000);
+  };
+}
+
+// ✓ CORRECT
+function Component() {
+  const [count, setCount] = React.useState(0);
+  
+  const handleClick = () => {
+    setTimeout(() => {
+      setCount((c) => {
+        console.log(c);  // Current value
+        return c + 1;
+      });
+    }, 1000);
+  };
+}
+```
+
+---
+
+## DOCUMENTATION & COMMENTS
+
+### 📝 RULE 16.1: JSDoc COMMENTS
+
+```tsx
+/**
+ * Fetches drifts with pagination
+ * 
+ * @param options Configuration options
+ * @param options.page Page number (1-indexed)
+ * @param options.limit Items per page (1-100)
+ * @param options.severity Filter by severity (optional)
+ * 
+ * @returns Promise resolving to paginated drift list
+ * @throws Error if API request fails
+ * 
+ * @example
+ * const drifts = await fetchDrifts({ page: 1, limit: 20 });
+ * console.log(drifts.items);  // Drift[]
+ */
+async function fetchDrifts(options: FetchDriftsOptions) {
+  // Implementation
+}
+```
+
+---
+
+### 📝 RULE 16.2: INLINE COMMENTS (EXPLAIN WHY, NOT WHAT)
+
+```tsx
+// ✗ WRONG - Explains what code does (obvious from reading)
+const drifts = response.data.filter((d) => d.severity === 'critical');  // Filter by critical
+
+// ✓ CORRECT - Explains why we're doing it
+// Only show critical drifts for quick triage (non-critical drifts can wait)
+const drifts = response.data.filter((d) => d.severity === 'critical');
+
+// ✗ WRONG - Obvious
+i++;  // Increment i
+
+// ✓ CORRECT - Non-obvious logic
+// Start from 1-based index (API expects 1-indexed pages, not 0-indexed)
+const pageNumber = i + 1;
+```
+
+---
+
+### 📝 RULE 16.3: COMPLEX LOGIC EXPLANATION
+
+```tsx
+// Complex algorithm? Explain it
+// This implements exponential backoff retry strategy:
+// - First retry: 1s delay
+// - Second retry: 2s delay (2^1)
+// - Third retry: 4s delay (2^2)
+// - Maximum: 30s (prevents excessive delays)
+// This prevents thundering herd when API recovers
+const delay = Math.min(1000 * Math.pow(2, attemptIndex), 30000);
+```
+
+---
+
+## SUMMARY: YOUR MENTAL CHECKLIST
+
+**Before writing code**, ask:**
+```
+1. ✅ Is it COMPLETE? (Not partial, not placeholder)
+2. ✅ Is it CORRECT? (Clear, obvious intent)
+3. ✅ Is it TESTABLE? (Can test in isolation)
+4. ✅ Is it MAINTAINABLE? (Easy to change later)
+5. ✅ Is it PERFORMANT? (Will run at 60FPS on low-end)
+
+If ALL YES → Write it
+If ANY NO → Stop and redesign
+```
+
+---
+
+**System Complete**: This is your AI's complete frontend decision engine.  
+**Apply to**: Every line of React/Next.js frontend code.  
+**Never break**: Treat as hard rules, not suggestions.  
+**Result**: Production-grade frontend that scales.

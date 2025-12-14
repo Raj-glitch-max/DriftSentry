@@ -1,0 +1,196 @@
+// Prisma Schema for DriftSentry
+// PostgreSQL with UUID and JSONB support
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MODEL
+// ============================================
+
+model User {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  firstName    String?   @map("first_name") @db.VarChar(100)
+  lastName     String?   @map("last_name") @db.VarChar(100)
+  avatarUrl    String?   @map("avatar_url") @db.VarChar(500)
+  role         String    @default("viewer") @db.VarChar(50)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+
+  // Relations
+  approvedDrifts Drift[]    @relation("ApprovedBy")
+  rejectedDrifts Drift[]    @relation("RejectedBy")
+  readAlerts     Alert[]    @relation("ReadBy")
+  auditLogs      AuditLog[] @relation("Actor")
+  sessions       Session[]
+
+  @@index([email])
+  @@index([createdAt(sort: Desc)])
+  @@index([role])
+  @@map("users")
+}
+
+// ============================================
+// DRIFT MODEL (Core Entity)
+// ============================================
+
+model Drift {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  resourceId       String    @map("resource_id") @db.VarChar(255)
+  resourceType     String    @map("resource_type") @db.VarChar(50)
+  region           String    @db.VarChar(50)
+  accountId        String?   @map("account_id") @db.VarChar(12)
+
+  expectedState    Json      @map("expected_state") @db.JsonB
+  actualState      Json      @map("actual_state") @db.JsonB
+  difference       Json      @db.JsonB
+
+  severity         String    @default("warning") @db.VarChar(20)
+  costImpactMonthly Decimal  @default(0) @map("cost_impact_monthly") @db.Decimal(10, 2)
+
+  status           String    @default("detected") @db.VarChar(50)
+
+  detectedAt       DateTime  @map("detected_at") @db.Timestamptz(6)
+  detectedBy       String    @map("detected_by") @db.VarChar(50)
+
+  approvedAt       DateTime? @map("approved_at") @db.Timestamptz(6)
+  approvedBy       String?   @map("approved_by") @db.Uuid
+  approvalReason   String?   @map("approval_reason") @db.Text
+  approver         User?     @relation("ApprovedBy", fields: [approvedBy], references: [id])
+
+  rejectedAt       DateTime? @map("rejected_at") @db.Timestamptz(6)
+  rejectedBy       String?   @map("rejected_by") @db.Uuid
+  rejectionReason  String?   @map("rejection_reason") @db.Text
+  rejecter         User?     @relation("RejectedBy", fields: [rejectedBy], references: [id])
+
+  resolvedAt       DateTime? @map("resolved_at") @db.Timestamptz(6)
+  resolvedHow      String?   @map("resolved_how") @db.VarChar(50)
+
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  alerts           Alert[]
+  costMetrics      CostMetric[]
+  auditLogs        AuditLog[]
+
+  @@index([status])
+  @@index([severity])
+  @@index([resourceType, region])
+  @@index([detectedAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@index([resourceId])
+  @@map("drifts")
+}
+
+// ============================================
+// ALERT MODEL
+// ============================================
+
+model Alert {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  driftId   String    @map("drift_id") @db.Uuid
+  type      String    @db.VarChar(50)
+  severity  String    @db.VarChar(20)
+  title     String    @db.VarChar(255)
+  message   String    @db.Text
+  isRead    Boolean   @default(false) @map("is_read")
+  readAt    DateTime? @map("read_at") @db.Timestamptz(6)
+  readBy    String?   @map("read_by") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  drift     Drift     @relation(fields: [driftId], references: [id], onDelete: Cascade)
+  reader    User?     @relation("ReadBy", fields: [readBy], references: [id])
+
+  @@index([driftId])
+  @@index([isRead])
+  @@index([createdAt(sort: Desc)])
+  @@index([severity])
+  @@map("alerts")
+}
+
+// ============================================
+// AUDIT LOG MODEL (Immutable)
+// ============================================
+
+model AuditLog {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  driftId    String?   @map("drift_id") @db.Uuid
+  action     String    @db.VarChar(100)
+  actorId    String?   @map("actor_id") @db.Uuid
+  actorEmail String?   @map("actor_email") @db.VarChar(255)
+  oldValue   Json?     @map("old_value") @db.JsonB
+  newValue   Json?     @map("new_value") @db.JsonB
+  details    Json?     @db.JsonB
+  ipAddress  String?   @map("ip_address") @db.Inet
+  userAgent  String?   @map("user_agent") @db.VarChar(500)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  drift      Drift?    @relation(fields: [driftId], references: [id], onDelete: SetNull)
+  actor      User?     @relation("Actor", fields: [actorId], references: [id])
+
+  @@index([driftId])
+  @@index([actorId])
+  @@index([createdAt(sort: Desc)])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ============================================
+// COST METRIC MODEL (Time-series)
+// ============================================
+
+model CostMetric {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  driftId              String?  @map("drift_id") @db.Uuid
+  costUsd              Decimal  @map("cost_usd") @db.Decimal(10, 2)
+  costProjectedMonthly Decimal? @map("cost_projected_monthly") @db.Decimal(10, 2)
+  recordedAt           DateTime @map("recorded_at") @db.Timestamptz(6)
+  periodStart          DateTime @map("period_start") @db.Timestamptz(6)
+  periodEnd            DateTime @map("period_end") @db.Timestamptz(6)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  drift                Drift?   @relation(fields: [driftId], references: [id], onDelete: Cascade)
+
+  @@index([driftId])
+  @@index([recordedAt(sort: Desc)])
+  @@map("cost_metrics")
+}
+
+// ============================================
+// SESSION MODEL (JWT Refresh Tokens)
+// ============================================
+
+model Session {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  refreshToken String    @unique @map("refresh_token") @db.VarChar(500)
+  ipAddress    String?   @map("ip_address") @db.Inet
+  userAgent    String?   @map("user_agent") @db.VarChar(500)
+  isRevoked    Boolean   @default(false) @map("is_revoked")
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastUsedAt   DateTime? @map("last_used_at") @db.Timestamptz(6)
+
+  // Relations
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@map("sessions")
+}
