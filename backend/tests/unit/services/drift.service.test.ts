@@ -37,11 +37,11 @@ describe('DriftService', () => {
         region: 'us-east-1',
         accountId: '123456789012',
         status: 'detected',
-        severity: 'high',
+        severity: 'warning',
         expectedState: { tags: { Environment: 'staging' } },
         actualState: { tags: { Environment: 'production' } },
         costImpactMonthly: 150.0,
-        detectedBy: 'aws-config',
+        detectedBy: 'scheduler',
         detectedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -60,9 +60,9 @@ describe('DriftService', () => {
             accountId: '123456789012',
             expectedState: { tags: { Environment: 'staging' } },
             actualState: { tags: { Environment: 'production' } },
-            severity: 'high' as const,
+            severity: 'warning' as const,
             costImpactMonthly: 150.0,
-            detectedBy: 'aws-config',
+            detectedBy: 'scheduler' as const,
         };
 
         // TEST CASE 1: Successfully create drift
@@ -122,8 +122,8 @@ describe('DriftService', () => {
         it('should reject negative cost impact', async () => {
             const negativeCostInput = { ...validInput, costImpactMonthly: -100 };
 
-            await expect(driftService.createDrift(negativeCostInput)).rejects.toThrow(ValidationError);
-            await expect(driftService.createDrift(negativeCostInput)).rejects.toThrow('cannot be negative');
+            await expect(driftService.createDrift(negativeCostInput as any)).rejects.toThrow(ValidationError);
+            await expect(driftService.createDrift(negativeCostInput as any)).rejects.toThrow('cannot be negative');
         });
 
         // TEST CASE 6: Reject invalid resource type
