@@ -1,0 +1,22 @@
+config:
+  target: "http://localhost:3002"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+    - duration: 120
+      arrivalRate: 20
+    - duration: 60
+      arrivalRate: 50
+  http:
+    timeout: 5
+
+scenarios:
+  - name: "Dashboard metrics"
+    flow:
+      - get:
+          url: "/api/v1/metrics/summary"
+      - think: 2
+      - get:
+          url: "/api/v1/drifts"
+      - get:
+          url: "/api/v1/alerts"
