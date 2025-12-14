@@ -6,6 +6,7 @@
 import { driftRepository } from '../repositories/drift.repository';
 import { costMetricRepository } from '../repositories/cost.repository';
 import { alertRepository } from '../repositories/alert.repository';
+import { cacheService, CacheKeys, CacheTTL } from './cache.service';
 import { logger } from '../utils/logger';
 import type { CostSummary, CostTrendPoint } from '../types/domain/cost';
 
@@ -34,10 +35,22 @@ export interface DashboardSummary {
  */
 export class MetricsService {
     /**
-     * Get dashboard summary metrics
+     * Get dashboard summary metrics (with caching)
      */
-    async getSummary(days: number = 30): Promise<DashboardSummary> {
+    async getSummary(days: number = 30, accountId?: string): Promise<DashboardSummary> {
         const startTime = Date.now();
+
+        // Try cache first
+        const cacheKey = CacheKeys.metrics.summary(accountId);
+        const cached = await cacheService.get<DashboardSummary>(cacheKey);
+
+        if (cached) {
+            logger.debug('Metrics summary served from cache', {
+                accountId,
+                duration: Date.now() - startTime
+            });
+            return cached;
+        }
 
         try {
             // Get drift counts
@@ -71,6 +84,9 @@ export class MetricsService {
                     projectedSavings: costSummary.savingsPotential,
                 },
             };
+
+            // Cache the result
+            await cacheService.set(cacheKey, summary, CacheTTL.METRICS_SUMMARY);
 
             logger.debug('Dashboard summary calculated', {
                 totalDrifts,

@@ -178,6 +178,30 @@ export class AlertRepository extends BaseRepository<Alert, AlertFilters, Alert> 
     }
 
     /**
+     * Mark all unread alerts as read (globally)
+     * Used for "Mark all as read" functionality
+     */
+    async markAllAsRead(userId: string): Promise<number> {
+        try {
+            const result = await prisma.alert.updateMany({
+                where: { isRead: false },
+                data: {
+                    isRead: true,
+                    readAt: new Date(),
+                    readBy: userId,
+                },
+            });
+
+            this.logSuccess('markAllAsRead', { userId, count: result.count });
+            return result.count;
+        } catch (error) {
+            this.logError('markAllAsRead', error, { userId });
+            throw new DatabaseError(`Failed to mark all alerts as read: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+
+    /**
      * Delete alert by ID
      */
     async delete(id: string): Promise<boolean> {
