@@ -141,6 +141,35 @@ export class AuditLogRepository extends BaseRepository<AuditLog, AuditLogFilters
     }
 
     /**
+     * Get timeline entries for a drift (includes user information)
+     * Used for drift detail timeline display
+     */
+    async getTimelineForDrift(driftId: string): Promise<Array<AuditLog & { actor: { email: string; role: string } | null }>> {
+        try {
+            const results = await prisma.auditLog.findMany({
+                where: { driftId },
+                orderBy: { createdAt: 'asc' }, // Timeline is chronological
+                include: {
+                    actor: {
+                        select: {
+                            email: true,
+                            role: true,
+                        },
+                    },
+                },
+            });
+
+            this.logSuccess('getTimelineForDrift', { driftId, count: results.length });
+            return results as any; // Type assertion for included actor
+        } catch (error) {
+            this.logError('getTimelineForDrift', error, { driftId });
+            throw new DatabaseError(`Failed to get timeline: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+
+
+    /**
      * Delete is not supported for audit logs (immutable)
      * @throws Error always
      */

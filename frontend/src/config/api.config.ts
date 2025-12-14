@@ -4,7 +4,7 @@
 
 export const API_CONFIG = {
     /** Base URL for API requests */
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1',
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api/v1',
 
     /** Request timeout in milliseconds */
     timeout: 30000,
@@ -26,7 +26,7 @@ export const API_CONFIG = {
     },
 
     /** WebSocket URL */
-    wsUrl: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001',
+    wsUrl: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3002',
 } as const;
 
 /** React Query configuration */

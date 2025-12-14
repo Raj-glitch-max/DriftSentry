@@ -4,6 +4,8 @@
  */
 
 import { alertRepository } from '../repositories/alert.repository';
+import { driftRepository } from '../repositories/drift.repository';
+import { auditService } from './audit.service';
 import { logger } from '../utils/logger';
 import type { Alert, CreateAlertInput, AlertFilters } from '../types/domain/alert';
 import type { PaginatedResult } from '../types/api/responses';
@@ -156,7 +158,41 @@ export class AlertService {
     async getUnreadCount(): Promise<number> {
         return alertRepository.getUnreadCount();
     }
+
+    /**
+     * Mark all unread alerts as read
+     * Used for "Mark all as read" button
+     */
+    async markAllAlertsAsRead(userId: string): Promise<number> {
+        const startTime = Date.now();
+
+        try {
+            const count = await alertRepository.markAllAsRead(userId);
+
+            // Audit log
+            await auditService.log({
+                action: 'alerts_marked_all_read',
+                actorId: userId,
+                details: { count },
+            });
+
+            logger.info('All alerts marked as read', {
+                userId,
+                count,
+                duration: Date.now() - startTime,
+            });
+
+            return count;
+        } catch (error) {
+            logger.error('Failed to mark all alerts as read', {
+                userId,
+                error: error instanceof Error ? error.message : String(error),
+            });
+            throw error;
+        }
+    }
 }
 
 // Export singleton
 export const alertService = new AlertService();
+
