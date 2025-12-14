@@ -1,0 +1,51 @@
+{
+    "family": "driftsentry-frontend",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/driftsentry-ecs-execution-role",
+    "containerDefinitions": [
+        {
+            "name": "frontend",
+            "image": "<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/driftsentry-frontend:latest",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "NODE_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "NEXT_PUBLIC_API_URL",
+                    "value": "http://<BACKEND_URL>:3001/api/v1"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/driftsentry-frontend",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "node -e \"require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) process.exit(1)})\""
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 60
+            }
+        }
+    ]
+}
