@@ -1,39 +1,78 @@
 /**
- * Rate Limiting Middleware
- * Protects API from abuse, DDoS attacks, and credential stuffing
+ * Rate Limiter Middleware
+ * Prevents abuse by limiting requests per IP/user
+ * Uses Redis for distributed rate limiting (with graceful fallback to memory)
  */
 
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
-import { Redis } from 'ioredis';
-import { env } from '../config/env';
+import Redis from 'ioredis';
 import { logger } from '../utils/logger';
 
-// Redis client for rate limiting
-let redisClient: Redis | undefined;
+/**
+ * Create Redis client with robust error handling
+ * Retries connection and gracefully falls back to memory store if Redis unavailable
+ */
+let redisClient: Redis | null = null;
+let redisAvailable = false;
 
-// Only use Redis if URL is configured, otherwise fall back to memory store
-if (env.redisUrl) {
+async function initializeRedis(): Promise<void> {
     try {
-        redisClient = new Redis(env.redisUrl, {
-            enableOfflineQueue: false,
+        const redis = new Redis({
+            host: process.env.REDIS_HOST || 'localhost',
+            port: parseInt(process.env.REDIS_PORT || '6379', 10),
+            password: process.env.REDIS_PASSWORD,
             maxRetriesPerRequest: 3,
+            retryStrategy(times) {
+                const delay = Math.min(times * 50, 2000);
+                logger.debug(`Redis retry attempt ${times}, waiting ${delay}ms`);
+                return delay;
+            },
+            enableOfflineQueue: false, // Don't queue commands if Redis is down
+            lazyConnect: true, // Don't connect immediately
         });
 
-        redisClient.on('error', (err) => {
-            logger.error('Redis connection error for rate limiting', { error: err.message });
+        // Wait for connection (with timeout)
+        await Promise.race([
+            redis.connect(),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Redis connection timeout')), 5000)
+            ),
+        ]);
+
+        // Test connection
+        await redis.ping();
+
+        redisClient = redis;
+        redisAvailable = true;
+        logger.info('✅ Redis connected successfully for rate limiting');
+
+        // Handle connection errors
+        redis.on('error', (err) => {
+            logger.error('Redis connection error:', { error: err.message });
+            redisAvailable = false;
         });
 
-        redisClient.on('connect', () => {
-            logger.info('Redis connected for rate limiting');
+        redis.on('reconnecting', () => {
+            logger.warn('Redis reconnecting...');
         });
+
+        redis.on('ready', () => {
+            logger.info('Redis ready');
+            redisAvailable = true;
+        });
+
     } catch (error) {
-        logger.warn('Failed to connect to Redis, using memory store for rate limiting', {
+        logger.warn('⚠️  Redis unavailable, using memory store for rate limiting', {
             error: error instanceof Error ? error.message : String(error),
         });
-        redisClient = undefined;
+        redisClient = null;
+        redisAvailable = false;
     }
 }
+
+// Initialize Redis asynchronously (don't block app startup)
+initializeRedis();
 
 /**
  * Global API rate limiter
@@ -51,13 +90,11 @@ export const globalLimiter = rateLimit({
     },
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable `X-RateLimit-*` headers
-    // Use Redis store if available, otherwise use default memory store
-    ...(redisClient && {
-        store: new RedisStore({
-            // @ts-ignore - type mismatch with latest ioredis, safe to bypass
-            sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
-        }),
-    }),
+    // Use Redis store ONLY if available, otherwise use default memory store
+    store: (redisAvailable && redisClient) ? new RedisStore({
+        // @ts-ignore - type mismatch with latest ioredis, safe to bypass
+        sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
+    }) : undefined, // undefined = use default MemoryStore
     handler: (req, res) => {
         logger.warn('Rate limit exceeded', {
             ip: req.ip,
@@ -91,12 +128,10 @@ export const authLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    ...(redisClient && {
-        store: new RedisStore({
-            // @ts-ignore - type mismatch with latest ioredis, safe to bypass
-            sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
-        }),
-    }),
+    store: (redisAvailable && redisClient) ? new RedisStore({
+        // @ts-ignore - type mismatch with latest ioredis, safe to bypass
+        sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
+    }) : undefined,
     handler: (req, res) => {
         logger.warn('Auth rate limit exceeded', {
             ip: req.ip,
@@ -128,12 +163,10 @@ export const apiKeyLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    ...(redisClient && {
-        store: new RedisStore({
-            // @ts-ignore - type mismatch with latest ioredis, safe to bypass
-            sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
-        }),
-    }),
+    store: (redisAvailable && redisClient) ? new RedisStore({
+        // @ts-ignore - type mismatch with latest ioredis, safe to bypass
+        sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
+    }) : undefined,
 });
 
 export { redisClient };
