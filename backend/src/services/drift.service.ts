@@ -4,16 +4,23 @@
  */
 
 import { driftRepository } from '../repositories/drift.repository';
-import { auditService } from './audit.service';
+import { alertRepository } from '../repositories/alert.repository';
 import { alertService } from './alert.service';
+import { auditService } from './audit.service';
+import { auditLogRepository } from '../repositories/audit.repository';
 import { emitDriftCreated, emitDriftApproved, emitDriftRejected } from '../websocket/events';
+import { cacheService, CacheKeys } from './cache.service';
 import { logger } from '../utils/logger';
-import type { Drift, CreateDriftInput, DriftFilters } from '../types/domain/drift';
-import {
-    ValidationError,
-    ConflictError,
-    NotFoundError,
-} from '../utils/errors';
+import type {
+    Drift,
+    CreateDriftInput,
+    DriftFilters,
+    ApproveDriftInput,
+    RejectDriftInput,
+} from '../types/domain';
+import type { PaginatedResult } from '../types/api/responses';
+import { NotFoundError, ValidationError, ConflictError } from '../utils/errors';
+import type { DriftTimelineEntry, TimelineAction, ActorRole } from '../types/domain/timeline';
 
 /**
  * Extended drift with computed fields
@@ -98,14 +105,21 @@ export class DriftService {
                 });
             }
 
-            logger.info('Drift created successfully', {
+            // 6. Emit WebSocket event
+            emitDriftCreated(drift);
+
+            // 7. Invalidate related caches
+            await Promise.all([
+                cacheService.deletePattern('metrics:*'),
+                cacheService.deletePattern('drifts:*'),
+            ]);
+
+            logger.info('Drift created', {
                 driftId: drift.id,
+                resourceId: input.resourceId,
                 severity: input.severity,
                 duration: Date.now() - startTime,
             });
-
-            // 6. Emit WebSocket event
-            emitDriftCreated(drift);
 
             return drift;
         } catch (error) {
@@ -153,6 +167,56 @@ export class DriftService {
             throw error;
         }
     }
+
+    /**
+     * Get drift timeline (audit history)
+     * Transforms audit logs into user-friendly timeline entries
+     *
+     * @throws NotFoundError if drift doesn't exist
+     */
+    async getDriftTimeline(driftId: string): Promise<DriftTimelineEntry[]> {
+        try {
+            // Verify drift exists
+            const drift = await driftRepository.getById(driftId);
+            if (!drift) {
+                throw new NotFoundError(`Drift ${driftId} not found`);
+            }
+
+            // Get audit logs with actor information
+            const auditLogs = await auditLogRepository.getTimelineForDrift(driftId);
+
+            // Transform to timeline entries
+            const timeline = auditLogs.map((log) => {
+                const actorEmail = log.actor?.email || log.actorEmail || null;
+                const actorRole = (log.actor?.role || 'system') as ActorRole;
+                const action = this.mapAuditActionToTimelineAction(log.action);
+                const message = this.generateTimelineMessage(log, actorEmail);
+
+                return {
+                    id: log.id,
+                    timestamp: log.createdAt.toISOString(),
+                    actorEmail,
+                    actorRole,
+                    action,
+                    message,
+                    metadata: {
+                        oldValue: log.oldValue,
+                        newValue: log.newValue,
+                        details: log.details,
+                        ipAddress: log.ipAddress,
+                    },
+                } as DriftTimelineEntry;
+            });
+
+            logger.debug('Timeline retrieved', { driftId, entries: timeline.length });
+            return timeline;
+        } catch (error) {
+            if (error instanceof NotFoundError) throw error;
+            logger.error('Failed to get drift timeline', { driftId, error });
+            throw error;
+        }
+    }
+
 
     /**
      * List drifts with filtering and pagination
@@ -268,15 +332,22 @@ export class DriftService {
             // 5. Clear related alerts
             await alertService.markAlertsByDriftAsResolved(driftId);
 
+            // 6. Emit WebSocket event
+            emitDriftApproved(updated, userId);
+
+            // 7. Invalidate caches
+            await Promise.all([
+                cacheService.delete(CacheKeys.drifts.detail(driftId)),
+                cacheService.deletePattern('metrics:*'),
+                cacheService.deletePattern('drifts:list:*'),
+            ]);
+
             logger.info('Drift approved', {
                 driftId,
                 approvedBy: userId ?? 'system',
                 reason: input.reason.substring(0, 50),
                 duration: Date.now() - startTime,
             });
-
-            // 6. Emit WebSocket event
-            emitDriftApproved(updated, userId);
 
             return updated;
         } catch (error) {
@@ -377,6 +448,52 @@ export class DriftService {
             );
         }
     }
+
+    /**
+     * Map audit action to timeline action type
+     */
+    private mapAuditActionToTimelineAction(auditAction: string): TimelineAction {
+        const actionMap: Record<string, TimelineAction> = {
+            'drift_created': 'created',
+            'drift_approved': 'approved',
+            'drift_rejected': 'rejected',
+            'drift_resolved': 'resolved',
+            'user_login': 'login',
+        };
+        return actionMap[auditAction] || 'other';
+    }
+
+    /**
+     * Generate human-readable message from audit log
+     */
+    private generateTimelineMessage(log: any, actorEmail: string | null): string {
+        const actor = actorEmail || 'System';
+
+        switch (log.action) {
+            case 'drift_created':
+                return `Drift detected by ${log.details?.source || 'system scanner'}`;
+
+            case 'drift_approved':
+                return `Drift approved by ${actor}`;
+
+            case 'drift_rejected':
+                return `Drift rejected by ${actor}`;
+
+            case 'drift_resolved':
+                return `Drift resolved via ${log.newValue?.resolvedHow || 'manual fix'}`;
+
+            case 'user_login':
+                return `${actor} logged in`;
+
+            default:
+                // Generate message from state changes
+                if (log.oldValue?.status && log.newValue?.status) {
+                    return `State changed: ${log.oldValue.status} → ${log.newValue.status}`;
+                }
+                return `Action performed: ${log.action}`;
+        }
+    }
+
 }
 
 // Export singleton

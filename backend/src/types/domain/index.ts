@@ -22,10 +22,12 @@ export type {
 // User types
 export type {
     UserRole,
+    UserSettings,
     User,
     UserPublic,
     CreateUserInput,
     UpdateUserInput,
+    UpdateUserSettingsInput,
     UpdateUserRoleInput,
     LoginInput,
     UserResponse,
@@ -67,3 +69,11 @@ export type {
     CreateSessionInput,
     SessionResponse,
 } from './session';
+
+// Timeline types
+export type {
+    TimelineAction,
+    ActorRole,
+    DriftTimelineEntry,
+} from './timeline';
+

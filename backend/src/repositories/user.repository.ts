@@ -9,6 +9,7 @@ import { BaseRepository, type BaseFilters } from './base.repository';
 import type {
     User,
     UserPublic,
+    UserSettings,
     CreateUserInput,
     UpdateUserInput,
     UserRole,
@@ -54,6 +55,11 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
                 throw new ConflictError(`User with email ${input.email} already exists`);
             }
 
+            // Create user with associated account (multi-tenancy)
+            const emailPrefix = input.email.split('@')[0] || 'user';
+            const accountName = emailPrefix + '\'s Account';
+            const accountSlug = emailPrefix.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
             const result = await prisma.user.create({
                 data: {
                     email: input.email.toLowerCase(),
@@ -61,6 +67,12 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
                     firstName: input.firstName,
                     lastName: input.lastName,
                     role: input.role ?? 'viewer',
+                    account: {
+                        create: {
+                            name: accountName,
+                            slug: accountSlug,
+                        },
+                    },
                 },
             });
 
@@ -262,6 +274,76 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
         }
     }
 
+    /**
+     * Update user settings
+     */
+    async updateSettings(id: string, settings: UserSettings): Promise<User> {
+        try {
+            const result = await prisma.user.update({
+                where: { id },
+                data: { settings: settings as any },
+            });
+
+            this.logSuccess('updateSettings', { userId: id });
+            return this.toDomain(result);
+        } catch (error) {
+            if (String(error).includes('Record to update not found')) {
+                throw new NotFoundError(`User ${id} not found`);
+            }
+            this.logError('updateSettings', error, { userId: id });
+            throw new DatabaseError(`Failed to update settings: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    /**
+     * Update API key with hash and metadata
+     */
+    async updateApiKey(id: string, data: { hash: string; last4: string; createdAt: Date }): Promise<User> {
+        try {
+            const result = await prisma.user.update({
+                where: { id },
+                data: {
+                    apiKeyHash: data.hash,
+                    apiKeyLast4: data.last4,
+                    apiKeyCreatedAt: data.createdAt,
+                },
+            });
+
+            this.logSuccess('updateApiKey', { userId: id });
+            return this.toDomain(result);
+        } catch (error) {
+            if (String(error).includes('Record to update not found')) {
+                throw new NotFoundError(`User ${id} not found`);
+            }
+            this.logError('updateApiKey', error, { userId: id });
+            throw new DatabaseError(`Failed to update API key: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    /**
+     * Soft delete user account
+     */
+    async softDelete(id: string): Promise<User> {
+        try {
+            const result = await prisma.user.update({
+                where: { id },
+                data: {
+                    isActive: false,
+                    deletedAt: new Date(),
+                },
+            });
+
+            this.logSuccess('softDelete', { userId: id });
+            return this.toDomain(result);
+        } catch (error) {
+            if (String(error).includes('Record to update not found')) {
+                throw new NotFoundError(`User ${id} not found`);
+            }
+            this.logError('softDelete', error, { userId: id });
+            throw new DatabaseError(`Failed to soft delete user: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
     // ========= PRIVATE METHODS =========
 
     /**
@@ -277,6 +359,11 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
             avatarUrl: (raw['avatarUrl'] as string) ?? undefined,
             role: raw['role'] as UserRole,
             isActive: raw['isActive'] as boolean,
+            settings: (raw['settings'] as UserSettings) ?? undefined,
+            apiKeyHash: (raw['apiKeyHash'] as string) ?? undefined,
+            apiKeyLast4: (raw['apiKeyLast4'] as string) ?? undefined,
+            apiKeyCreatedAt: (raw['apiKeyCreatedAt'] as Date) ?? undefined,
+            deletedAt: (raw['deletedAt'] as Date) ?? undefined,
             createdAt: raw['createdAt'] as Date,
             updatedAt: raw['updatedAt'] as Date,
             lastLoginAt: (raw['lastLoginAt'] as Date) ?? undefined,
@@ -295,6 +382,12 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
             avatarUrl: (raw['avatarUrl'] as string) ?? undefined,
             role: raw['role'] as UserRole,
             isActive: raw['isActive'] as boolean,
+            settings: (raw['settings'] as UserSettings) ?? undefined,
+            apiKey: (raw['apiKeyLast4'] as string) ? {
+                last4: raw['apiKeyLast4'] as string,
+                createdAt: (raw['apiKeyCreatedAt'] as Date) ?? undefined,
+                exists: true,
+            } : { exists: false },
             createdAt: raw['createdAt'] as Date,
             updatedAt: raw['updatedAt'] as Date,
             lastLoginAt: (raw['lastLoginAt'] as Date) ?? undefined,

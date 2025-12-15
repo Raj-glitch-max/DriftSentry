@@ -1,0 +1,66 @@
+{
+    "family": "driftsentry-backend",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/driftsentry-ecs-execution-role",
+    "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/driftsentry-ecs-task-role",
+    "containerDefinitions": [
+        {
+            "name": "backend",
+            "image": "<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/driftsentry-backend:latest",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 3001,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "NODE_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "PORT",
+                    "value": "3001"
+                },
+                {
+                    "name": "HOST",
+                    "value": "0.0.0.0"
+                }
+            ],
+            "secrets": [
+                {
+                    "name": "DATABASE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:driftsentry/prod/database-url"
+                },
+                {
+                    "name": "REDIS_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:driftsentry/prod/redis-url"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/driftsentry-backend",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:3001/health/live || exit 1"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 60
+            }
+        }
+    ]
+}

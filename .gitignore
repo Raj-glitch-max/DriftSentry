@@ -1,70 +1,135 @@
+# ==========================================
+# DriftSentry - Complete .gitignore
+# ==========================================
+
+# ==========================================
 # Dependencies
+# ==========================================
 node_modules/
-
-# Build outputs
-dist/
-build/
-.next/
-out/
-
-# Testing
-coverage/
-.nyc_output/
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-.env.development
-.env.test
-.env.production
-
-# IDE and editors
-.vscode/
-.idea/
-*.swp
-*.swo
-*.sublime-workspace
-*.sublime-project
-
-# OS files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
-logs/
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.pnp
+.pnp.js
 
-# Package manager locks (keep package-lock.json)
-yarn.lock
-pnpm-lock.yaml
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
 
-# Cache
-.cache/
-.parcel-cache/
-.turbo/
-
-# Temporary files
-temp/
-tmp/
-*.tmp
-*.temp
-
-# TypeScript build info
+# ==========================================
+# Build Outputs
+# ==========================================
+/backend/dist
+/backend/build
+/frontend/.next/
+/frontend/out/
 *.tsbuildinfo
 
-# Debug
-.pnpm-debug.log*
+# ==========================================
+# Testing
+# ==========================================
+/coverage
+*.lcov
+.nyc_output
 
-# Misc
-.vercel/
-*.pem
+# ==========================================
+# IDE / Editors
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# ==========================================
+# Logs
+# ==========================================
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# ==========================================
+# Database
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+/backend/prisma/migrations/*.sql.backup
+
+# ==========================================
+# Docker
+# ==========================================
+*.dockerignore.backup
+
+# ==========================================
+# Temporary Files
+# ==========================================
+*.tmp
+*.temp
+*.backup
+*.old
+*.bak
+.cache/
+
+# ==========================================
+# OS Files
+# ==========================================
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ==========================================
+# Python (if any python scripts)
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.venv/
+env/
+venv/
+
+# ==========================================
+# Next.js Specific
+# ==========================================
+.next/
+out/
+.vercel
+
+# ==========================================
+# Prisma
+# ==========================================
+/backend/node_modules/.prisma/
+
+# ==========================================
+# AWS & Deployment
+# ==========================================
+.aws-sam/
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# ==========================================
+# Others
+# ==========================================
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================================
+# Keep Working Docs
+# ==========================================
+!working-docs/
+!DOCS-root/

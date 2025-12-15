@@ -40,6 +40,11 @@ export class DriftRepository extends BaseRepository<Drift, DriftFilters, Drift> 
      */
     async create(input: CreateDriftInput): Promise<Drift> {
         try {
+            // accountId is required for multi-tenancy
+            if (!input.accountId) {
+                throw new ValidationError('accountId is required for drift creation');
+            }
+
             const difference = this.computeDifference(input.expectedState, input.actualState);
 
             const result = await prisma.drift.create({

@@ -7,6 +7,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { alertService } from '../services/alert.service';
 import { listAlertsSchema, validateRequest } from '../schemas';
 import { asyncHandler } from '../middleware/error.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 import { logger } from '../utils/logger';
 
 export const alertRouter = Router();
@@ -122,4 +123,41 @@ alertRouter.post(
     })
 );
 
+/**
+ * POST /api/v1/alerts/mark-all-read
+ * Mark all unread alerts as read
+ * Protected - requires authentication
+ *
+ * Response:
+ * {
+ *   success: true,
+ *   data: { markedCount: number }
+ * }
+ */
+alertRouter.post(
+    '/mark-all-read',
+    authMiddleware,
+    asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
+        const userId = (req as Request & { user?: { id: string } }).user?.id;
+
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                error: { message: 'Authentication required' },
+            });
+            return;
+        }
+
+        const markedCount = await alertService.markAllAlertsAsRead(userId);
+
+        logger.info('All alerts marked as read', { userId, count: markedCount });
+
+        res.status(200).json({
+            success: true,
+            data: { markedCount },
+        });
+    })
+);
+
 export default alertRouter;
+

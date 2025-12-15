@@ -12,7 +12,11 @@ export type AuditAction =
     | 'drift_rejected'
     | 'drift_resolved'
     | 'user_login'
-    | 'user_logout';
+    | 'user_logout'
+    | 'user_settings_updated'
+    | 'user_api_key_regenerated'
+    | 'user_account_deleted'
+    | 'alerts_marked_all_read';
 
 /**
  * Core AuditLog entity

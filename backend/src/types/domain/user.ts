@@ -9,6 +9,18 @@
 export type UserRole = 'admin' | 'engineer' | 'viewer';
 
 /**
+ * User settings/preferences
+ */
+export interface UserSettings {
+    /** Enable email notifications */
+    emailNotifications: boolean;
+    /** Enable Slack integration */
+    slackIntegration: boolean;
+    /** Show critical alerts only */
+    criticalAlertsOnly: boolean;
+}
+
+/**
  * Core User entity
  */
 export interface User {
@@ -28,6 +40,16 @@ export interface User {
     role: UserRole;
     /** Whether user account is active */
     isActive: boolean;
+    /** User preferences/settings */
+    settings?: UserSettings;
+    /** API key hash (bcrypt, never expose) */
+    apiKeyHash?: string;
+    /** Last 4 chars of API key (for display) */
+    apiKeyLast4?: string;
+    /** When API key was created */
+    apiKeyCreatedAt?: Date;
+    /** Soft delete timestamp */
+    deletedAt?: Date;
     /** Record creation timestamp */
     createdAt: Date;
     /** Record last update timestamp */
@@ -47,6 +69,12 @@ export interface UserPublic {
     avatarUrl?: string;
     role: UserRole;
     isActive: boolean;
+    settings?: UserSettings;
+    apiKey?: { // Masked API key info
+        last4?: string;
+        createdAt?: Date;
+        exists: boolean;
+    };
     createdAt: Date;
     updatedAt: Date;
     lastLoginAt?: Date;
@@ -70,6 +98,15 @@ export interface UpdateUserInput {
     firstName?: string;
     lastName?: string;
     avatarUrl?: string;
+}
+
+/**
+ * Input for updating user settings
+ */
+export interface UpdateUserSettingsInput {
+    emailNotifications?: boolean;
+    slackIntegration?: boolean;
+    criticalAlertsOnly?: boolean;
 }
 
 /**
@@ -104,6 +141,12 @@ export function toUserPublic(user: User): UserPublic {
         avatarUrl: user.avatarUrl,
         role: user.role,
         isActive: user.isActive,
+        settings: user.settings,
+        apiKey: user.apiKeyLast4 ? {
+            last4: user.apiKeyLast4,
+            createdAt: user.apiKeyCreatedAt,
+            exists: true,
+        } : { exists: false },
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         lastLoginAt: user.lastLoginAt,

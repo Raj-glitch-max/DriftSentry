@@ -82,6 +82,25 @@ driftRouter.get(
 );
 
 /**
+ * GET /api/v1/drifts/:id/timeline
+ * Get drift timeline (audit history)
+ * Public - no auth required
+ */
+driftRouter.get(
+    '/:id/timeline',
+    asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
+        const { id } = req.params;
+
+        const timeline = await driftService.getDriftTimeline(id as string);
+
+        res.status(200).json({
+            success: true,
+            data: timeline,
+        });
+    })
+);
+
+/**
  * POST /api/v1/drifts/:id/approve
  * Approve drift remediation
  * Protected - requires auth + admin or engineer role

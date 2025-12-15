@@ -30,8 +30,19 @@ export class AlertRepository extends BaseRepository<Alert, AlertFilters, Alert> 
      */
     async create(input: CreateAlertInput): Promise<Alert> {
         try {
+            // Get drift to retrieve accountId for multi-tenancy
+            const drift = await prisma.drift.findUnique({
+                where: { id: input.driftId },
+                select: { accountId: true },
+            });
+
+            if (!drift) {
+                throw new NotFoundError(`Drift with id ${input.driftId} not found`);
+            }
+
             const result = await prisma.alert.create({
                 data: {
+                    accountId: drift.accountId,
                     driftId: input.driftId,
                     type: input.type,
                     severity: input.severity,
@@ -176,6 +187,30 @@ export class AlertRepository extends BaseRepository<Alert, AlertFilters, Alert> 
             throw new DatabaseError(`Failed to mark alerts as read: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
+
+    /**
+     * Mark all unread alerts as read (globally)
+     * Used for "Mark all as read" functionality
+     */
+    async markAllAsRead(userId: string): Promise<number> {
+        try {
+            const result = await prisma.alert.updateMany({
+                where: { isRead: false },
+                data: {
+                    isRead: true,
+                    readAt: new Date(),
+                    readBy: userId,
+                },
+            });
+
+            this.logSuccess('markAllAsRead', { userId, count: result.count });
+            return result.count;
+        } catch (error) {
+            this.logError('markAllAsRead', error, { userId });
+            throw new DatabaseError(`Failed to mark all alerts as read: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
 
     /**
      * Delete alert by ID
