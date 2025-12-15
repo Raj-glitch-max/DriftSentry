@@ -1,5 +1,5 @@
 # Multi-stage build for Next.js
-FROM node:20-alpine AS dependenciesr
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
