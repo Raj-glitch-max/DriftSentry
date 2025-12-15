@@ -93,7 +93,8 @@ export const authLimiter = rateLimit({
     legacyHeaders: false,
     ...(redisClient && {
         store: new RedisStore({
-            sendCommand: ((...args: string[]) => redisClient!.call(...args)) as any,
+            // @ts-ignore - type mismatch with latest ioredis, safe to bypass
+            sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
         }),
     }),
     handler: (req, res) => {
@@ -129,7 +130,8 @@ export const apiKeyLimiter = rateLimit({
     legacyHeaders: false,
     ...(redisClient && {
         store: new RedisStore({
-            sendCommand: ((...args: string[]) => redisClient!.call(...args)) as any,
+            // @ts-ignore - type mismatch with latest ioredis, safe to bypass
+            sendCommand: (...args: string[]) => redisClient!.call(args[0], ...args.slice(1)),
         }),
     }),
 });
