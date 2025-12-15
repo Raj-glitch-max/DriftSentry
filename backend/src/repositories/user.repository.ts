@@ -55,6 +55,10 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
                 throw new ConflictError(`User with email ${input.email} already exists`);
             }
 
+            // Create user with associated account (multi-tenancy)
+            const accountName = input.email.split('@')[0] + '\'s Account';
+            const accountSlug = input.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+
             const result = await prisma.user.create({
                 data: {
                     email: input.email.toLowerCase(),
@@ -62,6 +66,12 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
                     firstName: input.firstName,
                     lastName: input.lastName,
                     role: input.role ?? 'viewer',
+                    account: {
+                        create: {
+                            name: accountName,
+                            slug: accountSlug,
+                        },
+                    },
                 },
             });
 

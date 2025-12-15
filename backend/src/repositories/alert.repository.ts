@@ -30,8 +30,19 @@ export class AlertRepository extends BaseRepository<Alert, AlertFilters, Alert> 
      */
     async create(input: CreateAlertInput): Promise<Alert> {
         try {
+            // Get drift to retrieve accountId for multi-tenancy
+            const drift = await prisma.drift.findUnique({
+                where: { id: input.driftId },
+                select: { accountId: true },
+            });
+
+            if (!drift) {
+                throw new NotFoundError(`Drift with id ${input.driftId} not found`);
+            }
+
             const result = await prisma.alert.create({
                 data: {
+                    accountId: drift.accountId,
                     driftId: input.driftId,
                     type: input.type,
                     severity: input.severity,
