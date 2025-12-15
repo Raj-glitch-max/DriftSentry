@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [develop, main, "feature/**"]
+    branches: [develop, main]
   pull_request:
     branches: [develop, main]
 
@@ -11,26 +11,30 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Quality checks: lint and test
+  # ==========================================
+  # Quality Checks & Tests
+  # ==========================================
   quality:
     name: Code Quality & Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x] # Updated from 18.x to 20.x for Next.js compatibility
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Backend quality
-      - name: Setup Node.js (Backend)
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
+      # Backend checks
       - name: Install backend dependencies
         run: cd backend && npm ci
 
