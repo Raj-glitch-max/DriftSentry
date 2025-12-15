@@ -28,8 +28,8 @@ WORKDIR /app
 # Install runtime dependencies
 # - dumb-init: proper signal handling
 # - curl: health checks
-# - openssl1.1-compat: required by Prisma engine
-RUN apk add --no-cache dumb-init curl openssl1.1-compat
+# - openssl-dev: required by Prisma engine (provides libssl)
+RUN apk add --no-cache dumb-init curl openssl-dev
 
 # Copy package files
 COPY --from=builder /build/package*.json ./
