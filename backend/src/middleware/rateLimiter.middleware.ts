@@ -54,7 +54,7 @@ export const globalLimiter = rateLimit({
     // Use Redis store if available, otherwise use default memory store
     ...(redisClient && {
         store: new RedisStore({
-            sendCommand: ((...args: string[]) => redisClient!.call(...args)) as any,
+            sendCommand: async (...args: readonly [string, ...string[]]) => redisClient!.call(args[0], ...args.slice(1)),
         }),
     }),
     handler: (req, res) => {

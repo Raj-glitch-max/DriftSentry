@@ -56,8 +56,9 @@ export class UserRepository extends BaseRepository<User, UserFilters, UserPublic
             }
 
             // Create user with associated account (multi-tenancy)
-            const accountName = input.email.split('@')[0] + '\'s Account';
-            const accountSlug = input.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const emailPrefix = input.email.split('@')[0] || 'user';
+            const accountName = emailPrefix + '\'s Account';
+            const accountSlug = emailPrefix.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
             const result = await prisma.user.create({
                 data: {
