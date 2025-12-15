@@ -18,14 +18,18 @@ RUN npx prisma generate
 # Build TypeScript
 RUN npm run build
 
-# -------------------------------------------
-# Stage 2: Runtime
+# -------------------------------------------# ========================================
+# Stage 2: Production Runtime
+# ========================================
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init curl
+# Install runtime dependencies
+# - dumb-init: proper signal handling
+# - curl: health checks
+# - openssl1.1-compat: required by Prisma engine
+RUN apk add --no-cache dumb-init curl openssl1.1-compat
 
 # Copy package files
 COPY --from=builder /build/package*.json ./
